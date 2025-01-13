@@ -2,17 +2,19 @@ BRDFlix
 =========
 Watch your XBMC videos transcoded on the fly using any flash based web browser.
 
-This was created in 2013 around the timeframe when Netflix streaming was first starting to become mainstream (~2010-2011).
+This was created in ~2012-2013 around the timeframe when Netflix streaming was first starting to become mainstream (~2010-2011).
 This is essentially what Plex.tv eventually became, but at the time, Plex hadn't even released a 1.0 yet, and this was quite fully featured comparatively.
 I no longer recommend the use of this software, as apps such as Plex are much more suited today, however I have provided it to share the ideas, concepts, and code within.
 
-Originally based on the Subsonic project, however through countless additions and modifications, it no longer resembles much of the original codebase.
+Originally based on the `Subsonic` project, which I integrated with XBMC and called `XBMCSonic`, however through countless additions and modifications, it no longer resembles much of the original codebase, and was also renamed to `BRDFlix`.
 
-> **Note:** This project originally contained hard-coded values, and those values have been replaced with `<TODO>` inside the codebase.
+> **Notice**  
+> This project originally contained hard-coded sensitive data, and those values have been replaced with `<TODO>` inside the codebase.
 > I don't really recommend anyone trying to use this. I have mostly provided it to share the ideas, concepts, and code within.
 
-> Date:   Fri Jan 11 13:10:08 2013 -0700  
-> _Initial commit_
+> Date:   Fri Jan 11 2013  
+> _Initial Commit_  
+> _Added all code from XBMCSonic project_
  
 
 Features:
