@@ -1,0 +1,8 @@
+- ability to download video sections, start_time to end_time and choose format
+
+- download a file to detect playback speed?
+- playback speed can be defined in the cookie to use last used setting
+
+later:
+- mod/upgrade to the newest jw 6.1
+- subtitle display using either jwplayer or libass (ffmpeg)

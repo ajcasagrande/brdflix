@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+#import brdflix
+<html>
+<head>
+<title>BRDFlix</title>
+#include $os.path.join($brdflix.TMPL_DIR, "global_css.tmpl")
+#include $os.path.join($brdflix.TMPL_DIR, "global_js.tmpl")
+
+<script type="text/javascript">
+function quickSkip(){
+    var offset = document.getElementById("quickSkip").value;
+    var src = "$source_url_no_offset";
+    document.getElementById("quickSkipGo").href = src + "&offset=" + offset;
+}
+</script>
+
+</head>
+<body>
+#if not $embed:
+#include $os.path.join($brdflix.TMPL_DIR, "header.tmpl")
+#end if
+
+<div>
+<video width="854" height="480" poster="$poster_url" controls>
+    <!--<source src="$variable_m3u8_url" type="application/vnd.apple.mpegurl" />-->
+    <!--<source src="/hls/variable_dynamic.m3u8?path64=$path64" type="application/vnd.apple.mpegurl" />-->
+    <source src="/hls/ffms.m3u8?play_id=$play_id&path64=$path64" type="application/vnd.apple.mpegurl" />
+</video>
+</div>
+
+#if not $embed:
+<br /><br />
+<select id="quickSkip" onchange="quickSkip();" style="padding-left:0.25em;padding-right:0.25em;margin-right:0.5em;display: inline;">
+#for $min in range($duration / 60):
+    #set $sec = $min * 60
+    #set $txt = "{0} Minutes".format($min)
+    #if int($sec) == int($offset):
+    <option value="$sec" selected="selected">$txt</option>
+    #else:
+    <option value="$sec">$txt</option>
+    #end if
+#end for
+</select>
+<a id="quickSkipGo" href="#">Skip</a>
+
+<br /><br />
+<a href="$video_m3u8_url">Variable Link</a>
+<br /><br />
+<a href="$video_m3u8_url">Direct Link</a>
+
+#if $user.group.admin_rights:
+#set $wtext = "Mark as unwatched" if $watched else "Mark as watched"
+#set $new_status = not $watched
+#if $episodeid is not None:
+<button onclick="setEpisodeWatched('$episodeid', '$new_status');">$wtext</button>
+#end if
+#if $movieid is not None:
+<button onclick="setMovieWatched('$movieid', '$new_status');">$wtext</button>
+#end if
+#end if
+
+<br />
+#include $os.path.join($brdflix.TMPL_DIR, "footer.tmpl")
+
+#end if
+
+</body>
+</html>

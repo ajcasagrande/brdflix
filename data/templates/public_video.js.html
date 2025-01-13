@@ -1,0 +1,24 @@
+<script type="text/javascript">
+
+function generate_vid_url(){
+    return "{{stream_host}}/stream/public_transcode.flv?guid={{link.id}}"
+}
+
+jQuery(document).ready(function() {
+    var vidUrl = generate_vid_url();
+
+    jwplayer("container").setup({
+        file: vidUrl,
+        width: 854,
+        height: 509,
+        skin: "/jwplayer/skins/newtubedark/newtubedark.zip",
+        duration: {{ link.end_time - link.start_time }},
+        provider: "video",
+        autostart: "false",
+        modes: [ { type: 'flash', src: "/jwplayer/player.swf" } ],
+        controlbar: "bottom"
+    });
+
+    jwplayer().play();
+});
+</script>

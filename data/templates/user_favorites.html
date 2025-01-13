@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Favorites - BRDFlix{% endblock %}
+
+{% block css %}
+    {{ super() }}
+    <link href='/js/cb/style.css' rel='stylesheet' type='text/css' />
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type='text/javascript' src='/js/cb/jquery/iphone-style-checkboxes.js'></script>
+
+    <script>
+    jQuery(document).ready(function() {
+    {% for fave in faves %}
+        $("#cb_fave_notify_{{ fave.id }}").iphoneStyle({
+            checkedLabel: 'NOTIFY ME',
+            uncheckedLabel: "DON'T NOTIFY",
+            onChange: function(){
+                modifyFaveNotification('{{ fave.id }}', $("#cb_fave_notify_{{ fave.id }}").is(':checked'));
+            }
+        });
+    {% endfor %}
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+<h1>Favorites:</h1>
+{% for fave in faves %}
+    {{ macros.favorite_table(fave, user) }}
+{% endfor %}
+{% endblock %}

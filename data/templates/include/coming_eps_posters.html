@@ -1,0 +1,5 @@
+{% import 'include/macros.html' as macros %}
+
+{% for ep in coming_eps %}
+    {{ macros.coming_poster(ep) }}
+{% endfor %}

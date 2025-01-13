@@ -1,0 +1,396 @@
+{% set use_html5 = True %}
+{% set audio_mode = False %}
+{% set video_format = 'webm' %}
+
+<script type="text/javascript">
+var ua = navigator.userAgent.toLowerCase();
+var isMobile = ua.indexOf("mobile") > -1;
+var runtime = {{ media.duration }};
+var timeOffset = {{ offset }};
+var quality = {{ default_quality.id }};
+var bufferLength;
+var bufferOffset;
+var bufferLocation;
+var vol_boost = {{ vol_boost }};
+var started = false;
+var duration;
+var position;
+var pos;
+var vidUrl='';
+var resume_interval=10;
+var last_save_pos=0;
+var completed = false;
+var autoPlayEps = true;
+var stretched = false;
+var crop_3d = false;
+
+var quality_map = {};
+{% for q in qualities %}
+quality_map[{{ q.id }}] = {{ q.bitrate }};
+{% endfor %}
+
+function generate_vid_url(format, thequality){
+    return "{{stream_host}}/stream/transcode.{0}?play_id={1}&media_id={2}&offset={3}&quality={4}&volume={5}&zl={6}&crop_3d={7}".format([ format, {{play.id}}, {{media.id}}, timeOffset, thequality, vol_boost, "{{login_info}}", crop_3d ? "True" : "False" ])
+}
+
+function generate_episode_url(id, format, thequality){
+    return "{{stream_host}}/stream/episode?id={0}&format={1}&offset={2}&quality={3}&volume={4}&zl={5}".format([ id, format, timeOffset, thequality, vol_boost, "{{login_info}}" ])
+}
+
+function get_transcode_download_url(format, thequality){
+    return "/download/transcode?media_id={0}&format={1}&quality={2}&volume={3}".format([ {{media.id}}, format, thequality, vol_boost ])
+}
+
+function get_current_quality_id(){
+    return parseInt(document.getElementById("theQuality").value);
+}
+
+function toggle_sbs(){
+    crop_3d = !crop_3d;
+    var new_offset = parseFloat(timeOffset) + Math.floor(jwplayer().getPosition());
+    smart_seek(new_offset, false)
+}
+
+function estimate_bytes(offset, duration){
+    var bytes = quality_map[quality] * 1024.0 / 8.0 * (duration - offset);
+    // TODO: What is the audio bitrate (128?)
+    var a_bytes = 128 * 1024.0 / 8.0 * (duration - offset);
+    console.log("Estimated bytes: " + (bytes + a_bytes));
+    return bytes + a_bytes;
+}
+
+function loadAndPlay(offset){
+    timeOffset = offset;
+    jwplayer().setTimeOffset(timeOffset);
+    jwplayer().setEstimatedBytes(estimate_bytes(timeOffset, runtime));
+    jwplayer().load([
+        {
+            sources: [
+                { file: generate_vid_url("flv", quality), label: "Flash" },
+                { file: generate_vid_url("webm", quality), label: "WebM" },
+                { file: generate_vid_url("ogv", quality), label: "Ogv" },
+                { file: "{{ video_m3u8_base_url }}&offset=" + timeOffset, type: "hls" }
+            ],
+            tracks: [
+                {% if media.subtitles %}
+                {% for sub in media.subtitles %}
+                    {
+                        file: '{{stream_host}}/stream/srt?media_id={{media.id}}&stream_index={{ sub.stream_index }}&offset=' + timeOffset,
+                        kind: "captions",
+                        label: "{{ sub.title }} ({{ sub.language }})",
+                        "default": {{ "true" if sub.default else "false" }}
+                    },
+                {% endfor %}
+                {% endif %}
+                {
+                    file: "{{ stream_host }}/stream/thumbs.vtt?media_id={{ media.id }}",
+                    kind: "thumbnails"
+                }
+            ]
+        }
+    ]);
+    jwplayer().setDuration(runtime);
+    jwplayer().play();
+}
+
+function toggle_stretched(){
+    stretched = !stretched;
+    if (stretched){
+        stretch_video();
+        //jwplayer().resize("100%", "100%");
+        // Smooth scroll to the video container
+        //smooth_scroll("#container");
+        $("#wrapper").css("position", "absolute");
+        $("#wrapper").css("top", "0px");
+        $("#wrapper").css("left", "0px");
+        $("#wrapper").css("z-index", "9998");
+    } else {
+        jwplayer().resize("854", "480");
+        $("#wrapper").removeAttr( 'style' );
+    }
+}
+
+function changeQuality() {
+    //if (started){
+        quality = get_current_quality_id();
+        setCookie('{{ brdflix.QUALITY_COOKIE }}', quality, 30);
+        var new_offset = parseFloat(timeOffset) + Math.floor(jwplayer().getPosition());
+        smart_seek(new_offset, false)
+    //}
+}
+
+function setVolumeBoost(vol){
+   // if (started){
+        vol_boost = vol;
+        setCookie('{{ brdflix.VOLUME_COOKIE }}', vol_boost, 30);
+        var new_offset = parseFloat(timeOffset) + Math.floor(jwplayer().getPosition());
+        smart_seek(new_offset, false)
+   // }
+}
+
+function perform_seek(jw_seek, position, offset, allow_over){
+    var buffer_end = timeOffset + ((runtime - timeOffset) * jwplayer().getBuffer() / 100);
+    console.log("timeOffset: {0}, bufferEnd: {1}, new_offset:{2}, position: {3}".format([timeOffset, buffer_end, offset, position]));
+    if (offset >= timeOffset && (offset < buffer_end || offset < position)){
+        // No need to reload video
+        if (jw_seek){
+            console.log("Seek without reload");
+            jwplayer().seek(offset);
+        }
+    } else {
+        console.log("Seek requires reload");
+        smart_seek(offset, allow_over);
+    }
+}
+
+function smart_seek(offset, allow_over){
+    jwplayer().setTimeOffset(offset - (jwplayer().getPosition() + timeOffset));
+    var url="/watch/get_seek_time?media_id={0}&s={1}&allow_over={2}".format([ {{media.id}}, offset, allow_over ? "True" : "False" ])
+    $.getJSON(url, function(data) {
+        var s = data.res.s;
+        if (s) {
+            console.log(s);
+            loadAndPlay(parseFloat(s));
+        } else {
+            loadAndPlay(offset);
+        }
+    });
+}
+
+function stretch_video(){
+    jwplayer().resize($(window).width(), $(window).height());
+}
+
+$(document).ready(function() {
+    console.log("Stream Host: {{stream_host}}/");
+
+    $( window ).resize(function() {
+        if (stretched){
+            stretch_video();
+        }
+    });
+
+    {% if resume %}
+        {% if not force_resume %}
+            var resume_time = getPrettyTime({{ resume.offset }});
+            $('#resume-dialog').dialog({
+                resizable: false,
+                height: 175,
+                modal: true,
+                buttons: {
+                    "Resume" : function() {
+                        $( this ).dialog( "close" );
+                        smart_seek({{ resume.offset }}, false);
+                        started = true;
+                    },
+                    "Start over": function() {
+                        $( this ).dialog( "close" );
+                        jwplayer().play();
+                        started = true;
+                    }
+                }
+            });
+        {% endif %}
+    {% endif %}
+
+    $('#cbAutoPlay').iphoneStyle({
+        checkedLabel: 'AUTOPLAY ON',
+        uncheckedLabel: 'AUTOPLAY OFF',
+        onChange: function(){
+            if($('#cbAutoPlay').is(':checked'))
+            {
+                setCookie('{{ brdflix.AUTOPLAY_COOKIE }}', 'True', 30);
+            }
+            else
+            {
+                setCookie('{{ brdflix.AUTOPLAY_COOKIE }}', 'False', 30);
+            }
+        }
+    });
+
+    var tq = document.getElementById("quality_" + quality.toString());
+    if (tq != null){
+        tq.selected = true;
+    }
+
+    $("#radio_volume").buttonset();
+
+    jwplayer("container").setup({
+        sources: [
+            { file: generate_vid_url("flv", quality), label: "Flash" },
+            { file: generate_vid_url("webm", quality), label: "WebM" },
+            { file: generate_vid_url("ogv", quality), label: "Ogv" },
+            { file: "{{ video_m3u8_base_url }}&offset=" + timeOffset, type: "hls" } ],
+{#        title: "{{ media.fname }}",#}
+        image: "{{ poster_url }}",
+        primary: "flash",
+        flashplayer: "/jwplayer_6_8/jwplayer.flash.swf?{{ RUN_ID }}",
+        html5player: "/jwplayer_6_8/jwplayer.html5.js?{{ RUN_ID }}",
+        autostart: false,
+        width: 854,
+        {% if audio_mode %}
+        height: 30,
+        {% else %}
+        height: 480,
+        {% endif %}
+        captions: {
+            back: false
+            //color: 'cc0000',
+            //fontsize: 20
+        },
+{#        skin: "/jwplayer_6_8/skins/bekle.xml",#}
+{#        listbar: {#}
+{#            position: 'right',#}
+{#            size: 320#}
+{#        },#}
+        tracks: [
+            {% if media.subtitles %}
+                {% for sub in media.subtitles %}
+                    {
+                        file: '{{stream_host}}/stream/srt?media_id={{media.id}}&stream_index={{ sub.stream_index }}&offset=' + timeOffset,
+                        kind: "captions",
+                        label: "{{ sub.title }} ({{ sub.language }})",
+                        "default": {{ "true" if sub.default else "false" }}
+                    },
+                {% endfor %}
+            {% endif %}
+            {
+                file: "{{ stream_host }}/stream/thumbs.vtt?media_id={{ media.id }}",
+                kind: "thumbnails"
+            }]
+    });
+    // Setup initial values to ensure proper seek bar
+    jwplayer().setTimeOffset(timeOffset);
+    jwplayer().setDuration(runtime);
+    jwplayer().setEstimatedBytes(estimate_bytes(timeOffset, runtime));
+
+    {% if stretch %}
+    toggle_stretched();
+    {% endif %}
+
+    {% if not audio_mode %}
+    // Add a button to download the video (popup)
+    jwplayer().addButton(
+        "/images/jw6-download.png?{{ RUN_ID }}",
+        "Download Video",
+        function() {
+            jwplayer().pause(true);
+            var url = '/download?media_id={{ media.id }}&embed=True';
+            $.colorbox({iframe:true, innerWidth:640, innerHeight:526, scrolling:false, href:url});
+        },
+        "download"
+    );
+
+    // Add a button to report an issue with the video
+    jwplayer().addButton(
+            "/images/jw6-report-issue.png?{{ RUN_ID }}",
+            "Report Issue",
+            function() {
+                jwplayer().pause(true);
+                var url = '/submit_issue?media_id={{ media.id }}&embed=True';
+                $.colorbox({iframe:true, innerWidth:640, innerHeight:526, scrolling:false, href:url});
+            },
+            "report_issue"
+    );
+
+    // Add a button to do 3d sbs -> 2d
+    jwplayer().addButton(
+            "/images/jw6-sbs.png?{{ RUN_ID }}",
+            "3D SBS -> 2D",
+            function() {
+                toggle_sbs();
+            },
+            "btn_toggle_sbs"
+    );
+
+    // Add a button to stretch video
+    jwplayer().addButton(
+            "/images/jw6-maximize.png?{{ RUN_ID }}",
+            "Toggle Stretch",
+            function() {
+                toggle_stretched();
+            },
+            "btn_stretch"
+    );
+
+    {% else %}
+        smooth_scroll("#container");
+    {% endif %}
+
+    jwplayer().onSeek(function(seek){
+        perform_seek(false, seek.position + timeOffset, seek.offset, true);
+    });
+
+    jwplayer().onTime(function(time){
+        var newPosition = Math.round(time.position);
+        if (newPosition != position){
+            position = newPosition;
+            duration = time.duration;
+            pos = parseFloat(timeOffset) + parseFloat(position);
+
+            {#
+            // Auto save every resume_interval seconds a resume point.
+            // The absolute value also makes it so if the user seeks backwards
+            // the resume point is remembered. #}
+            if (Math.abs(pos - last_save_pos) >= resume_interval){
+                addResume(false, {{ user.id }}, {{ media.id }}, pos, 'True');
+                last_save_pos = pos;
+            }
+
+            if (!completed && duration - pos < 4){
+                completed = true;
+                {% if nextEp %}
+                if (document.getElementById('cbAutoPlay').checked){
+                    setTimeout(function() {
+                        {# // set offset to 0 in order to prevent the resume dialog from showing #}
+                        window.location = "/watch/episode?id={{ nextEp.id }}&offset=0&stretch="+(stretched ? 'True' : 'False');
+                    }, 5000);
+                    $.pnotify({
+                        title: 'Auto Play',
+                        text: 'Starting next episode in 5 seconds...',
+                        type: 'success',
+                        styling: 'jqueryui',
+                        opacity: 1.0,
+                        history: false,
+                        delay: 2000
+                    });
+                }
+                {% endif %}
+            }
+        }
+    });
+
+    $(window).keydown(function( event ) {
+        console.log(event.which);
+        var pos = jwplayer().getPosition() + timeOffset;
+        if (event.which == KEY_ESCAPE){
+            if (stretched){
+                toggle_stretched();
+            }
+        } else if (event.which == KEY_SPACE){
+            //  This will actually toggle pause
+            jwplayer().pause();
+        } else if (event.which == KEY_LEFT){
+            // Seek 10 seconds backwards
+            perform_seek(true, pos, pos - 10, false);
+        } else if (event.which == KEY_RIGHT){
+            // Seek 10 seconds forwards
+            perform_seek(true, pos, pos + 10, true);
+        } else if (event.which == KEY_DOWN){
+            // Seek 15% backwards
+            perform_seek(true, pos, Math.max(pos - (0.15 * runtime), 0), true);
+        } else if (event.which == KEY_UP){
+            // Seek 15% forwards
+            perform_seek(true, pos, Math.min(pos + (0.15 * runtime), runtime), true);
+        }
+    });
+
+    {% if not resume %}
+        jwplayer().play();
+        started = true;
+    {% elif force_resume %}
+        smart_seek({{ resume.offset }}, false);
+        started = true;
+    {% endif %}
+});
+</script>

@@ -1,0 +1,298 @@
+{% set use_html5 = False %}
+
+<script type="text/javascript">
+var ua = navigator.userAgent.toLowerCase();
+var isMobile = ua.indexOf("mobile") > -1;
+var runtime = {{ media.duration }};
+var timeOffset = {{ offset }};
+var quality = {{ default_quality.id }};
+var bufferLength;
+var bufferOffset;
+var bufferLocation;
+var vol_boost = 256;
+var started = false;
+var duration;
+var position;
+var pos;
+var vidUrl='';
+var resume_interval=10;
+var last_save_pos=0;
+var completed = false;
+var autoPlayEps = true;
+
+function generate_vid_url(){
+    return "{{stream_host}}/stream/transcode?play_id={0}&media_id={1}&offset={2}&quality={3}&volume={4}&zl={5}".format([ {{play.id}}, {{media.id}}, timeOffset, quality, vol_boost, "{{login_info}}" ])
+}
+
+{#
+/**
+ * This function calls my custom jwplayer function to set
+ * the seek bar offset, so when you skip in the video
+ * the seek bar represents the actual video location.
+ * @param offset
+ */ #}
+function setPlayerOffset(offset){
+    jwplayer().callInternal("jwTimeOffset", offset);
+}
+
+function loadAndPlay(){
+    started = true;
+    vidUrl = generate_vid_url()
+    setPlayerOffset(timeOffset);
+    {% if use_html5 %}
+        var url = '{{stream_host}}/stream/srt?media_id={{media.id}}&offset=' + timeOffset;
+        jwplayer().load({ file: vidUrl.replace('transcode?', 'transcode.webm?'), duration: runtime, provider: "video" });
+    {% else %}
+        jwplayer().load({ file: vidUrl.replace('transcode?', 'transcode.flv?'), duration: runtime, provider: "video" });
+    {% endif %}
+    jwplayer().play();
+    setPlayerOffset(timeOffset);
+}
+
+function changeQuality() {
+    if (started){
+        quality = parseInt(document.getElementById("theQuality").value);
+        setCookie('{{ brdflix.QUALITY_COOKIE }}', quality, 30);
+        var new_offset = parseFloat(timeOffset) + Math.floor(jwplayer().getPosition());
+        smart_seek(new_offset, 'False')
+    }
+}
+
+function setVolumeBoost(vol){
+    if (started){
+        vol_boost = vol;
+        var new_offset = parseFloat(timeOffset) + Math.floor(jwplayer().getPosition());
+        smart_seek(new_offset, 'False')
+    }
+}
+
+function smart_seek(offset, allow_over){
+    var url="/watch/get_seek_time?media_id={0}&s={1}&allow_over={2}".format([ {{media.id}}, offset, allow_over ])
+    jQuery.getJSON(url, function(data) {
+        var s = data.res.s;
+        if (s) {
+            console.log(s);
+            timeOffset = s
+            loadAndPlay();
+        } else {
+            timeOffset = offset;
+            loadAndPlay();
+        }
+    });
+}
+
+jQuery(document).ready(function() {
+    console.log("Stream Host: {{stream_host}}/");
+
+    {% if resume %}
+    var resume_time = getPrettyTime({{ resume.offset }});
+    jQuery('#resume-dialog').dialog({
+        resizable: false,
+        height: 175,
+        modal: true,
+        buttons: {
+            "Resume" : function() {
+                jQuery( this ).dialog( "close" );
+                smart_seek({{ resume.offset }}, 'False');
+            },
+            "Start over": function() {
+                jQuery( this ).dialog( "close" );
+                jwplayer().play();
+                started = true;
+            }
+        }
+    });
+    {% endif %}
+
+    jQuery('#cbAutoPlay').iphoneStyle({
+        checkedLabel: 'AUTOPLAY ON',
+        uncheckedLabel: 'AUTOPLAY OFF',
+        onChange: function(){
+            if(jQuery('#cbAutoPlay').is(':checked'))
+            {
+                setCookie('{{ brdflix.AUTOPLAY_COOKIE }}', 'True', 30);
+            }
+            else
+            {
+                setCookie('{{ brdflix.AUTOPLAY_COOKIE }}', 'False', 30);
+            }
+        }
+    });
+
+    var vidUrl = generate_vid_url();
+
+    var tq = document.getElementById("quality_" + quality.toString());
+    if (tq != null){
+        tq.selected = true;
+    }
+
+    jQuery("#radio_volume").buttonset();
+
+    {#
+    jwplayer("container").setup({
+        {% if use_html5 %}
+            levels: [ { file: vidUrl.replace('transcode?', 'transcode.webm?'), format: 'video/webm' },
+                { file: vidUrl.replace('transcode?', 'transcode.ogv?'), format: 'video/ogg' },
+                { file: vidUrl.replace('transcode?', 'transcode.flv?'), format: 'video/x-flv' } ],
+        {% else %}
+            file: vidUrl.replace('transcode?', 'transcode.flv?'),
+        {% endif %}
+        image: "{{ poster_url }}",
+        tracks: [{
+            file: '{{stream_host}}/stream/srt?media_id={{media.id}}&offset=' + timeOffset,
+            label: 'English',
+            kind: 'captions',
+            "default": true
+        }],
+        width: 854,
+        {% if embed %}
+            height: 480,
+        {% else %}
+            height: 480,//509,
+        {% endif %}
+        duration: runtime,
+        provider: "video",
+        autostart: "false",
+        {% if use_html5 %}
+            modes: [ { type: 'html5' },
+                { type: 'flash', src: "/jwplayer_6_6/jwplayer.flash.swf" } ],
+        {% else %}
+            modes: [ { type: 'flash', src: "/jwplayer_6_6/jwplayer.flash.swf" } ],
+        {% endif %}
+        {% if emdeb %}
+            controlbar: "over",
+        {% else %}
+            controlbar: "bottom",
+        {% endif %}
+    });
+ #}
+
+    var skin = "/jwplayer/skins/newtubedark/newtubedark.zip";
+    if (isMobile){
+        skin = "/jwplayer/newtubedark_mobile.zip";
+    }
+
+    jwplayer("container").setup({
+    {% if use_html5 %}
+        levels: [ { file: vidUrl + '&format=webm', format: 'video/webm' },
+                  { file: vidUrl + '&format=ogv', format: 'video/ogg' },
+                  { file: vidUrl + '&format=flv', format: 'video/x-flv' } ],
+    {% else %}
+        file: vidUrl,
+    {% endif %}
+        image: "{{ poster_url }}",
+        width: 854,
+        {% if embed %}
+        height: 480,
+        {% else %}
+        height: 509,
+        {% endif %}
+        skin: skin,
+        duration: runtime,
+        provider: "video",
+        autostart: "false",
+    {% if use_html5 %}
+        modes: [ { type: 'html5' },
+                 { type: 'flash', src: "/jwplayer_6_8/jwplayer.flash.swf" } ],
+    {% else %}
+        modes: [ { type: 'flash', src: "/jwplayer/player.swf" } ],
+    {% endif %}
+
+    {% if emdeb %}
+        controlbar: "over",
+    {% else %}
+        controlbar: "bottom",
+    {% endif %}
+
+        plugins: {
+            //'backstroke-1': { }, //allows keyboard controls, but player must be selected
+    {% if show_srt %}
+            'captions-2': {
+                file: '{{stream_host}}/stream/srt?media_id={{media.id}}&offset=' + timeOffset
+            },
+    {% endif %}
+    {% if enable_thumbs %}
+            'timeslidertooltipplugin-3': {
+                displayhours: true,
+                preview: {
+                    enabled: true,
+                    prefix: 'name=',
+                    path: '{{stream_host}}/stream/preview?media_id={{media.id}}&frequency={{thumb_freq}}&',
+                    frequency: {{thumb_freq}},
+                    linelength: 1,
+                    spritelength: 1,
+                    //path: '{{stream_host}}/stream/preview_multi?media_id={{media.id}}&frequency=1&linelength=5&spritelength=10&',
+                    //frequency: 1,
+                    //linelength: 5,
+                    //spritelength: 10,
+                }
+            }
+    {% endif %}
+        }
+    });
+
+    setPlayerOffset(timeOffset);
+
+    jwplayer().onBufferChange(function(buffer){
+        bufferLength = (buffer.bufferPercent * buffer.duration) / 100.0;
+        bufferOffset = buffer.position + bufferLength;
+        bufferLocation = timeOffset + bufferOffset;
+    });
+
+    jwplayer().onSeek(function(seek){
+        if (seek.offset < parseFloat(timeOffset) || seek.offset > pos){
+            {# Have to reload video because is out of current bounds #}
+            {# TODO: Need to track the buffer location #}
+            smart_seek(seek.offset, 'True');
+        } else {
+            {# Still reload video, since its not really working #}
+            smart_seek(seek.offset, 'True');
+        }
+    });
+
+    jwplayer().onTime(function(time){
+        var newPosition = Math.round(time.position);
+        if (newPosition != position){
+            position = newPosition;
+            duration = time.duration;
+            pos = parseFloat(timeOffset) + parseFloat(position);
+
+            {#
+            // Auto save every resume_interval seconds a resume point.
+            // The absolute value also makes it so if the user seeks backwards
+            // the resume point is remembered. #}
+            if (Math.abs(pos - last_save_pos) >= resume_interval){
+                addResume(false, {{ user.id }}, {{ media.id }}, pos, 'True');
+                last_save_pos = pos;
+            }
+
+            if (!completed && duration - pos < 2){
+                completed = true;
+                {% if nextEp %}
+                if (document.getElementById('cbAutoPlay').checked){
+                    setTimeout(function() {
+                        {# // set offset to 0 in order to prevent the resume dialog from showing #}
+                        window.location = "/watch/episode?id={{ nextEp.id }}&offset=0&stretch=";
+                    }, 3000);
+                    jQuery.pnotify({
+                        title: 'Auto Play',
+                        text: 'Starting next episode in 5 seconds...',
+                        type: 'success',
+                        styling: 'jqueryui',
+                        opacity: 1.0,
+                        history: false,
+                        delay: 2000
+                    });
+                }
+                {% endif %}
+            }
+        }
+    });
+
+    {% if not resume %}
+        setPlayerOffset(timeOffset);
+        jwplayer().play();
+        started = true;
+    {% endif %}
+});
+</script>

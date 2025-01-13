@@ -1,0 +1,156 @@
+<script type="text/javascript">
+
+$(document).ready(function(){
+    create_streams_chart("streams_chart_div");
+});
+
+function MyChart(options){
+  this.svg = options.svg;
+  this.zoom = options.zoom;
+  this.id = options.id;
+  this.width = options.width;
+  this.height = options.height;
+  this.margin = options.margin;
+  this.data = options.data;
+  this.x = options.x;
+  this.y = options.y;
+  this.update_data = options.update_data;
+	this.csv = options.csv;
+}
+
+function MyTimescale(options){
+  this.svg = options.svg;
+  this.id = options.id;
+  this.width = options.width;
+  this.height = options.height;
+  this.margin = options.margin;
+  this.data = options.data;
+  this.update_span = options.update_span;
+  this.on_brush = options.on_brush;
+  this.brush = options.brush;
+  this.vm_uuid = options.vm_uuid;
+  this.csv = options.csv;
+}
+
+function create_streams_chart(elementId, height, width){
+    if (height === undefined) { height = 500; }
+    if (width === undefined) { width = 1600; }
+
+    var data;
+    
+    function visualizeit(){
+        var margin = {top: 10, right: 20, bottom: 20, left: 50};
+        width = width - margin.left - margin.right;
+        height = height - margin.top - margin.bottom;
+        var x = d3.time.scale().range([0, width]);
+        var y = d3.scale.linear().range([height, 0]);
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").tickSize(-height, 0).tickPadding(4);
+        var yAxis = d3.svg.axis().scale(y).orient("left").tickSize(-width).tickPadding(6);
+        var color = d3.scale.category10();
+        var zoom = d3.behavior.zoom().on("zoom", zoomed);
+
+        document.getElementById(elementId).innerHTML = "";
+        var svg = d3.select("#"+elementId).append("svg")
+            .attr("id", "streams_chart")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.append("rect")
+                .attr("width", width)
+                .attr("height", height)
+                .call(zoom);
+
+        for (var key in data){
+            data[key].forEach(function(d){
+                d.end_ms = +d.end_ms;
+                d.date = new Date(d.end_ms);
+                d.mbps = +d.mbps;
+                d.play_id = +d.play_id;
+                d.stream_id = +d.stream_id;
+                d.stream_part_id = +d.stream_part_id;
+                d.total_bytes = +d.total_bytes;
+                d.total_ms = +d.total_ms;
+            });
+        }
+
+        var x_min = new Date().getTime();
+        var x_max = 0;
+        var y_max = 0;
+        for (var key in data){
+            var min = d3.min(data[key], function(d){ return d.date.getTime(); });
+            var max = d3.max(data[key], function(d){ return d.date.getTime(); });
+            var y_m = d3.max(data[key], function(d){ return d.mbps; });
+            if (max > x_max) x_max = max;
+            if (min < x_min) x_min = min;
+            if (y_m > y_max) y_max = y_m;
+        }
+
+        x.domain([new Date(x_min), new Date(x_max)]);
+        y.domain([0, y_max * 1.25]);
+        zoom.x(x);
+
+        svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+        svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Mbps");
+
+        var clip = svg.append("svg:clipPath")
+                .attr("id", "clip_stream")
+                .append("svg:rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", width)
+                .attr("height", height);
+
+        var i_val = 0;
+        var lines = [];
+        for (var key in data){
+            var i = i_val;
+            var line = d3.svg.line()
+                    .interpolate("cardinal")
+                    .x(function(d) { return x(d.date); })
+                    .y(function(d) { return y(d.mbps); });
+
+            var vals = data[key];
+            svg.append("path").datum(vals).attr("class", "line").attr("id", "line"+i.toString())
+                    .attr("d", line)
+                    .style("stroke", function(d) { return color(i); })
+                    .attr("data-legend",function(d) { return "Stream " + key.toString()})
+                    .attr("data-legend-pos",function(d) { return i.toString()})
+                    .attr("clip-path", "url(#clip_stream)")
+                    .call(zoom);
+            lines[i] = line;
+            i_val++;
+        }
+
+        function zoomed() {
+            svg.select("g.x.axis").call(xAxis);
+            svg.select("g.y.axis").call(yAxis);
+
+            for (var i=0;i<lines.length;i++){
+                svg.select("#line"+i.toString()).attr("d", lines[i]);
+            };
+        }
+    }
+
+    d3.json("/charts/active_streams.json", function(error, json) {
+      if (error) return console.warn(error);
+      data = json;
+      visualizeit();
+    });
+
+}
+
+</script>

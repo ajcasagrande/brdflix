@@ -1,0 +1,44 @@
+#import brdflix
+#from brdflix import sickbeard
+<header>
+    <div class="header container">
+        <a href="/"><img src="/images/brdflix_logo.png" height="60" /></a>
+        
+        <div class="account-wrapper">
+            <ul id="user-account-nav">
+                <li><a href="/user/config">Settings</a></li>
+                <li><a href="/user/logout">Logout $getVar('user.username', '')</a></li>
+            </ul>
+        </div>
+        
+        <ul class="info-nav">
+            <li><a href="/">Home</a></li>
+            #if $getVar('user.group.admin_rights', False):
+            <li>
+                <a href="/admin">Admin</a>
+                <div class="dropdown">
+                <ul class="meta-links-top">
+                    <li><a href="#" onclick="performScan();">XBMC Library Scan</a></li>
+                </ul>
+                <ul class="meta-links-top">
+                    <li><a href="/admin/missing/">Missing Episodes</a></li>
+                </ul>
+                <ul class="meta-links-top">
+                    <li><a href="$sickbeard.getHtmlBaseUrl()" target="_blank">SickBeard Home</a></li>
+                    <li><a href="$sickbeard.getHtmlBaseUrl()/comingEpisodes" target="_blank">Coming Episodes</a></li>
+                    <li><a href="$sickbeard.getHtmlBaseUrl()/home/addShows/newShow" target="_blank">Add New Show</a></li>
+                </ul>
+                <ul>
+                    <li><a href="#" onclick="performRestart();">Restart (JSON)</a></li>
+                    <li><a href="/admin/restart/">Restart Process</a></li>
+                </ul>
+                </div>
+            </li>
+            #end if
+            <li><a href="/tv/">TV Shows</a></li>
+            <li><a href="/movies/?sort_method=year&ascending=False">Movies</a></li>
+            <li><a href="/tv/recent">Recent Episodes</a></li>
+            <li><a href="/movies/recent">Recent Movies</a></li>
+        </ul>
+    </div>
+</header>

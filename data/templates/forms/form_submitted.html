@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="/js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.colorbox-min.js"></script>
+    <script>
+    $(document).ready(function(){
+        parent.jQuery.colorbox.resize();
+        setTimeout(function(){
+            parent.jQuery.colorbox.close();
+            window.close();
+        }, 1500);
+    });
+    </script>
+</head>
+<body>
+<h3>Form Submitted!</h3>
+<span>This window will now close.</span>
+</body>
+</html>

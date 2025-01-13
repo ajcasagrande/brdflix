@@ -1,0 +1,616 @@
+﻿html, body {
+    font-family: sans-serif;
+    font-size: 12px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.tvposter {
+    display: inline;
+    float: left;
+    margin: 3px;
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    width: 120px;
+    height: 220px;
+    margin: 0px 6px 0px 6px;
+}
+
+.moviePoster {
+    display: inline;
+    float: left;
+    margin: 3px;
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    width: 120px;
+    height: 220px;
+    margin: 0px 6px 0px 6px;
+}
+
+.episodeThumb {
+    float: left;
+    margin: 3px;
+    overflow: hidden;
+    padding: 3px;
+    position: relative;
+    text-align: center;
+    width: 200px;
+    height: 140px;
+}
+
+.tvshowName {
+    background-color: black;
+	color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+	border-radius: 0px 0px 3px 3px;
+    /*height: 28px;*/
+}
+
+.movieName {
+    background-color: black;
+	color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+	border-radius: 0px 0px 3px 3px;
+}
+
+.episodeName {
+    background-color: black;
+	color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+	border-radius: 0px 0px 3px 3px;
+    padding: 1px 2px 1px 2px;
+}
+
+.episodeMissing {
+    color: #ff0000;
+}
+
+#background {
+    width: 100%; 
+    height: 100%; 
+    position: absolute; 
+    left: 0px; 
+    top: 0px; 
+    z-index: 0;
+}
+
+.stretch { 
+    min-width:100%; 
+    min-height:100%; 
+    width:auto; 
+    height:auto; 
+}
+
+.footer {
+    width: 100%;
+    height: 50px;
+    float: bottom;
+}
+
+.footer p {
+    text-align: center;
+}
+
+a.logout {
+    font-size: 20px;
+    color: black;
+    text-decoration: none;
+}
+a.logout:visited { 
+    color: black;
+    text-decoration: none;
+}
+
+div.logout {
+    float: right;
+    display: inline;
+    margin-right: 15px;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+a :visited {
+    text-decoration: none;
+    color: black;
+}
+
+a.noclick :hover{
+    cursor: default;
+    text-decoration: none;
+}
+
+a.noline :hover{
+    text-decoration: none;
+}
+
+.labelCount {
+    color: white;
+}
+
+.navText {
+    color: white;
+}
+
+nav[role="navigation"]{
+    height: 44px;
+}
+
+ul.navMenu{
+    height: 44px;
+    min-width: 100%;
+    vertical-align: baseline;
+}
+
+div.mainContent {
+    float: center;
+}
+
+a.textA :hover {
+    background: black;
+    color: black;
+}
+
+table.recent_episode {
+    display:inline-table; 
+    background-color: black;
+    height: 160px;
+    width: 320px;
+    margin: 3px;
+}
+
+.episodeThumb a img {
+    padding: 0;
+    margin: 0;
+    float: top;
+    display: block;
+}
+
+td, tr, img  { padding: 0px; margin: 0px; border: none; }
+table { border-collapse: collapse; }
+
+.recent_outer {
+    position: relative;
+    background-color: gray;
+    border: 1px solid black;
+    padding: 3px;
+    margin: 3px;
+    width: 323px;
+}
+
+.recent_inner {
+    border: 1px solid black;
+    background-color: black;
+    width: 320px;
+    height: 160px;
+}
+
+.recent_inner a {
+    text-decoration: none;
+}
+
+.recent_poster {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: black;
+}
+
+.recent_thumb {
+    position: absolute;
+    top: 0px;
+    left: 109px;
+    background-color: black;
+    width: 211;
+    display: block;
+}
+
+.recent_title {
+    position: absolute;
+    top: 118px;
+    left: 109px;
+    width: 211px;
+    height: 42px;
+    vertical-align: middle;
+    background-color: black;
+	color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.recent_table_title {
+    vertical-align: middle;
+    background-color: black;
+	color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.tv_info{
+    margin: 10px;
+    border: 1px solid black;
+}
+
+.tv_info_fanart{
+    display: block;
+    border-right: 1px solid black;
+    height: 200px;
+}
+
+.tv_seasons {
+    margin: 10px;
+}
+
+.season_episodes{
+    overflow: auto;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.season_table{
+    width: 100%
+}
+
+.episode_table {
+    border: 1px solid white;
+    margin: 3px;
+    height: 112px;
+    overflow: auto;
+    background-color: white; /*rgb(210, 209, 208);*/
+    color: black;
+}
+
+.episode_table:hover{
+
+}
+
+.ep_table_image {
+    background-color: #efefef; 
+    border-right: 1px solid white;
+}
+
+.ep_table_image:hover {
+}
+
+td.epTitle {
+    text-align: left;
+    font-size: 14px;
+    font-weight: bold;
+    width: 100%;
+    color: #000;
+    background: #f5fafa;
+    border-bottom: 1px solid #d2ebe8;
+    padding-left: 5px;
+}
+
+td.show_title {
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    width: 100%;
+    color: #000;
+    background: #f5fafa;
+    border-bottom: 1px solid #d2ebe8;
+    padding-left: 5px;
+}
+
+.episode_summary{
+    vertical-align: top;
+    overflow-y:auto;
+    overflow-x:visible;
+    padding: 5px;
+    font-size: 9px;
+}
+
+.recent_ep_title{
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+    height: 40px;
+    color: #000;
+    background: #f5fafa;
+    border-top: 1px solid #d2ebe8;
+    padding-left: 5px;
+}
+
+.recent_episode_table {
+    border: 1px solid white;
+    margin: 10px 3px;
+    overflow: auto;
+    background-color: rgb(210, 209, 208);
+    color: black;
+}
+
+.missing {
+    color: black;
+}
+.missing a {
+    color: black;
+}
+.skipped {
+    background-color: rgb(190, 222, 237);
+}
+.wanted {
+    background-color: rgb(255, 176, 176);
+}
+.snatched{
+    background-color: rgb(234, 192, 234);
+}
+
+.downloaded{
+    background-color: rgb(195, 227, 200);
+}
+
+.missing-table{
+    width: 100%;
+    border: 1px solid black;
+}
+.missing-table tr {
+    border: 1px solid black;
+}
+
+.all-favorites {
+}
+
+.favorites_content{
+    padding-top: 10px;
+    background-color: #D2D1D0;
+}
+
+.all-watchlist {
+
+}
+
+.watchlist_content{
+    padding-top: 10px;
+    background-color: #D2D1D0;
+}
+
+.all-resumes {
+
+}
+
+.resumes_content{
+    padding-top: 10px;
+    background-color: #D2D1D0;
+}
+
+.collapse-header{
+    background-color: #333;
+}
+
+.collapse-header h1{
+    color: #fff;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.selectedSeason{
+    background-color: red;
+    /*color: black;*/
+}
+
+/* quality tags */
+span.quality {
+    display: inline-block;
+    padding: 2px 4px;
+    font: bold 1em/1.2em verdana, sans-serif;
+    color: #fff;
+    text-align: center;
+    background: none repeat scroll 0 0 #999;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+span.Custom {
+    background: none repeat scroll 0 0 #449;
+    /* purplish blue */
+}
+span.HD {
+    background: none repeat scroll 0 0 #008fbb;
+    /* greenish blue */
+}
+span.HD720p {
+    background: none repeat scroll 0 0 #494;
+    /* green */
+}
+span.HD1080p {
+    background: none repeat scroll 0 0 #499;
+    /* blue */
+}
+span.SD {
+    background: none repeat scroll 0 0 #944;
+    /* red */
+}
+span.Any {
+    background: none repeat scroll 0 0 #444;
+    /* black */
+}
+span.RawHD {
+    background: none repeat scroll 0 0 #999944;
+    /* dark orange */
+}
+
+.sb_coming {
+    width: auto;
+    padding: 10px;
+    margin: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+}
+
+.sb_missed {
+    background-color: #fdd;
+}
+.sb_today {
+    background-color: #9f9;
+}
+.sb_soon {
+    background-color: #f5f1e4;
+}
+.sb_later {
+    background-color: #ddf;
+}
+.sb_unknown {
+    background-color: #ffdc89;
+}
+.sb_default {
+    background-color: #f5f1e4;
+}
+
+div.report_div{
+    position: relative;
+}
+button.report_button{
+    position:absolute;
+    top:10;
+    right:10;
+}
+
+.all-upcoming {
+    background: white;
+}
+
+/* =======================================================================
+SickBeard Coming Episodes
+========================================================================== */
+.tvshowDiv {
+    display: block;
+    width: 606px;
+    padding: 0;
+    margin: auto;
+    clear: both;
+    text-align: left;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+}
+.tvshowDiv a, .tvshowDiv a:link, .tvshowDiv a:visited, .tvshowDiv a:hover  {
+    text-decoration: none;
+    background: none;
+}
+.tvshowTitle a {
+    padding-left: 8px;
+    font-size: 13px;
+    line-height: 23px;
+    color: #fff;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+}
+.tvshowTitleIcons {
+    float: right;
+    padding: 3px 5px;
+}
+.tvshowDiv .title {
+    font-weight: 900;
+    color: #333;
+}
+.posterThumb {
+    height: 200px;
+    vertical-align: top;
+    -ms-interpolation-mode: bicubic;
+}
+.bannerThumb {
+    height: 112px;
+    vertical-align: top;
+    border-bottom: 1px solid #d2ebe8;
+    -ms-interpolation-mode: bicubic;
+}
+.tvshowDiv th {
+    letter-spacing: 1px;
+    color: #000;
+    text-align: left;
+    background-color: #333;
+}
+.tvshowDiv th.nobg {
+    text-align: center;
+    background: #efefef;
+    border-top: 1px solid #666;
+}
+.tvshowDiv td {
+    padding: 10px;
+    color: #000;
+    background: #fff;
+}
+.tvshowDiv td.nextEp {
+    width: 100%;
+    color: #000;
+    background: #f5fafa;
+    border-bottom: 1px solid #d2ebe8;
+}
+h2.day {
+    margin: 10px 0;
+    letter-spacing: 1px;
+    color: #000;
+    text-align: center;
+    background-color: #9cb5cf;
+}
+h2.network {
+    margin: 10px 0;
+    letter-spacing: 1px;
+    color: #000;
+    text-align: center;
+    background-color: #8fbfaf;
+}
+.epListing {
+    width: auto;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+}
+.listing-default {
+    background-color: #f5f1e4;
+}
+.listing-current {
+    background-color: #dfd;
+}
+.listing-waiting {
+    background-color: #9f9;
+}
+.listing-overdue {
+    background-color: #fdd;
+}
+.listing-toofar {
+    background-color: #ddf;
+}
+.listing-unknown {
+    background-color: #ffdc89;
+}
+span.pause {
+    font-size: 12px;
+    color: #f00;
+}
+.epSummaryTrigger {
+    float: left;
+    padding-top: 5px;
+}
+.epSummary {
+    padding-top: 5px;
+    margin-left: 25px;
+}
+/* =======================================================================
+END --- SickBeard Coming Episodes
+========================================================================== */
+
+/*
+Override any codecanyon css rules
+*/
+/* this will get rid of the anoying button stretching observed in
+codecanyon.css and fixes some of the jwplayer skins
+*/
+button {
+    min-width: 0;
+}

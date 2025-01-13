@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {{ super() }}
+    <style>
+    iframe {
+        width: 95%;
+        height: 350px;
+        margin-top: 25px;
+        margin-left: 30px;
+    }
+    </style>
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+{% set query = show_name|create_query(season, episode) %}
+<iframe src="http://binsearch.info/index.php?q={{ query }}&m=&max=100&adv_g=&adv_age=5000&adv_sort=date&adv_col=on&minsize=&maxsize=&font=&postdate=#r2"></iframe>
+<iframe src="https://nzbfinder.ws/search/{{ query }}?t=-1&ob=size_desc#browsetable"></iframe>
+<iframe src="http://www.nzbclub.com/search.aspx?q={{ query }}#ctl00_ContentPlaceHolder2_RadGrid1_ctl00__0"></iframe>
+<iframe src="http://www.nzbindex.com/search?q={{ query }}#results"></iframe>
+<div style="height: 50px;"></div>
+{% endblock %}

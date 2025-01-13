@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>BRDFlix Login</title>
+    <link href="/css/login.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="/js/sha1.js"></script>
+    <script>
+        $(document).ready(function() {
+            document.getElementById('username').focus();
+            $("#submit").click(function (){
+                $("#password").val(CryptoJS.SHA1($("#password").val()));
+            });
+        });
+    </script>
+</head>
+<body>
+<form id="login" action="/user/login/" method="post">
+    <h2>BRDFlix Login</h2>
+    <fieldset id="inputs">
+        <input id="username" name="u" type="text" placeholder="Username" autofocus required>
+        <input id="password" name="p" type="password" placeholder="Password" required>
+    </fieldset>
+    <fieldset id="actions">
+        {% if referer %}
+        <input type="hidden" name="referer" value="{{ referer }}" />
+        {% endif %}
+        <input type="submit" id="submit" name="login" value="Login" />
+        <input type="checkbox" style="margin-left: 30px; margin-top: 10px;" name="remember" checked="checked" value="True">Remember Me?</input>
+    </fieldset>
+</form>
+</body>
+</html>

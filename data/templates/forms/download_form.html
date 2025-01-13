@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="/css/pform.css" media="all">
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/js/pform.js"></script>
+    <script>
+    $(document).ready(function(){
+        $('input:radio').change(
+                function(){
+                   if (document.getElementById("cb_original").checked){
+                        $("#transcode_opts").css("visibility", "hidden");
+                   } else if (document.getElementById("cb_transcode").checked){
+                       $("#transcode_opts").css("visibility", "visible");
+                   }
+                }
+        );
+    });
+    </script>
+{% endblock %}
+
+{% block header %}
+    {% if embed %}
+        {# DO NOTHING -- WE DO NOT WANT A HEADER FOR EMBED MODE! #}
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+	<img style="margin: -16px;" id="top" src="/images/top.png" alt="">
+    <div id="form_container">
+
+        <h1><a>Download Video</a></h1>
+        <form id="form_810258" class="appnitro"  method="post" action="?">
+            <div class="form_description">
+                <h2>Download Video</h2>
+            </div>
+            <ul >
+
+                <li id="li_1" >
+                    <label class="description" for="element_1">Download Method </label>
+		<span>
+        <div id="multiple_choice">
+        <input id="cb_original" name="type" class="element radio" type="radio" value="raw" checked="checked" />
+        <label class="choice" for="cb_original">Original ({{ raw_size }})</label>
+        <input id="cb_transcode" name="type" class="element radio" type="radio" value="transcode" />
+        <label class="choice" for="cb_transcode">Transcoded</label>
+        </div>
+		</span>
+                </li>
+           <div id="transcode_opts" style="visibility: hidden">
+                <li id="li_2" >
+                <label class="description" for="element_2">Video Format </label>
+                <div>
+                    <select class="element select medium" id="element_2" name="format">
+                        <option value="flv" >FLV</option>
+                        <option value="webm" >WebM</option>
+                        <option value="ogv" >Ogv</option>
+                        <option value="mp4" >MP4</option>
+                        <option value="ts" >TS</option>
+
+                    </select>
+                </div>
+            </li>		<li id="li_3" >
+                <label class="description" for="element_3">Video Quality </label>
+                <div>
+                    <select class="element select medium" id="element_3" name="quality">
+                        {% for quality in qualities %}
+                            <option id="quality_{{quality.id}}" value="{{quality.id}}">{{quality.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </li>		<li id="li_4" >
+                <label class="description" for="element_4">Audio Boost </label>
+                <div>
+                    <select class="element select medium" id="element_4" name="vol">
+                        {{ macros.option_vol('None', 256, True) }}
+                        {{ macros.option_vol('Low', 512) }}
+                        {{ macros.option_vol('Med', 1024) }}
+                        {{ macros.option_vol('High', 2048) }}
+                        {{ macros.option_vol('Super', 3072) }}
+                    </select>
+                </div>
+            </li>		<li id="li_5" >
+                <label class="description" for="element_5">Audio Channels </label>
+                <div>
+                    <select class="element select medium" id="element_5" name="channels">
+                        <option value="2" >Stereo (2.0)</option>
+                        <option value="6" >Surround (5.1)</option>
+                    </select>
+                </div>
+            </li>
+           </div>
+                <li class="buttons">
+                    <input type="hidden" name="media_id" value="{{ media.id }}" />
+
+                    <input id="submit" class="button_text" type="submit" name="submit" value="Download" />
+                </li>
+            </ul>
+        </form>
+    </div>
+    <img id="bottom" src="bottom.png" alt="">
+{% endblock %}
+
+{% block footer %}
+    {% if embed %}
+        {# DO NOTHING -- WE DO NOT WANT A FOOTER FOR EMBED MODE! #}
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="/css/pform.css" media="all">
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/js/pform.js"></script>
+{% endblock %}
+
+{% block header %}
+    {% if embed %}
+        {# DO NOTHING -- WE DO NOT WANT A HEADER FOR EMBED MODE! #}
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+	<img style="margin: -16px;" id="top" src="/images/top.png" alt="">
+    <div id="form_container">
+		<h1><a>Submit Issue</a></h1>
+		<form id="form_803545" class="appnitro"  method="post" action="?">
+					<div class="form_description">
+            <h2>{{ media.fname }}</h2>
+			<p>Please tell us what is wrong with the video</p>
+		</div>						
+			<ul >
+			
+					<li id="li_2" >
+		<label class="description" for="element_2">Issues </label>
+		<span>
+			<input id="cb_wrong_movie" name="cb_wrong_movie" class="element checkbox" type="checkbox" value="1" />
+            <label class="choice" for="cb_wrong_movie">Wrong Movie/Episode</label>
+            <input id="cb_wrong_audio" name="cb_wrong_audio" class="element checkbox" type="checkbox" value="1" />
+            <label class="choice" for="cb_wrong_audio">Incorrect Language/Audio</label>
+            <input id="cb_video_issue" name="cb_video_issue" class="element checkbox" type="checkbox" value="1" />
+            <label class="choice" for="cb_video_issue">Video does not play</label>
+            <input id="cb_audio_issue" name="cb_audio_issue" class="element checkbox" type="checkbox" value="1" />
+            <label class="choice" for="cb_audio_issue">Audio does not play</label>
+            <input id="cb_video_freeze" name="cb_video_freeze" class="element checkbox" type="checkbox" value="1" />
+            <label class="choice" for="cb_video_freeze">Video freezes at particular point</label>
+            <input id="cb_other" name="cb_other" class="element checkbox" type="checkbox" value="1" />
+            <label class="choice" for="cb_other">Other</label>
+        </span>
+		</li>		<li id="li_1" >
+		<label class="description" for="txt_details">Additional Details (Optional) </label>
+		<div>
+			<textarea id="txt_details" name="txt_details" class="element textarea small"></textarea>
+		</div> 
+		</li>
+			
+					<li class="buttons">
+			    <input type="hidden" name="media_id" value="{{ media.id }}" />
+                <input type="hidden" name="embed" value="{{ "True" if embed else "False" }}" />
+			    
+				<input id="submit" class="button_text" type="submit" name="submit" value="Submit" />
+		</li>
+			</ul>
+		</form>	
+	</div>
+    <img id="bottom" src="/images/bottom.png" alt="">
+{% endblock %}
+
+{% block footer %}
+    {% if embed %}
+        {# DO NOTHING -- WE DO NOT WANT A FOOTER FOR EMBED MODE! #}
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}

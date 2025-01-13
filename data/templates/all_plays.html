@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {{ super() }}
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/highcharts/js/highcharts.js"></script>
+    <script type="text/javascript" src="/highcharts/js/themes/grid.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            {% for play in plays %}
+            var chart_{{ play.id }} = new Highcharts.Chart({
+                chart: {
+                    renderTo: "chart_{{ play.id }}",
+                    type: 'spline',
+                    events: {
+                        load: function() {
+                            var series = this.series;
+                            setInterval(function() {
+                                $.getJSON('/charts/play_details_json?play_id={{ play.id }}', function(data) {
+                                    console.log(data);
+                                    for (var j=0; j < series.length; j++){
+                                        for (var i=series[j].data.length; i < data.series[j].data.length; i++){
+                                            var values = [data.series[j].data[i][0], data.series[j].data[i][1]];
+                                            series[j].addPoint(values, true, false);
+                                        }
+                                    }
+                                });
+                            }, 3000);
+                        }
+                    }
+                },
+                title: {
+                    text: "{{ play.fname }}"
+                },
+                subtitle: {
+                    text: "User ID: {{ play.user_id }}, IP: {{ play.ip_address }}"
+                },
+                xAxis: {
+                    title: {
+                        text: 'Time'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Megabits Per Second (Mbps)'
+                    },
+                    min: 0,
+                    max: 15
+                },
+                tooltip: {
+                    formatter: function() {
+                        return '<b>'+ "{{ play.fname }}" + '</b><br/>'+
+                                new Date(this.x * 1000).toGMTString() +'<br/> '+ this.y.toFixed(2) + ' Mbps';
+                    }
+                },
+                plotOptions: {
+                    spline: {
+                        lineWidth: 4,
+                        states: {
+                            hover: {
+                                lineWidth: 4
+                            }
+                        },
+                        marker: {
+                            enabled: false,
+                            states: {
+                                hover: {
+                                    enabled: true,
+                                    symbol: 'circle',
+                                    radius: 5,
+                                    lineWidth: 1
+                                }
+                            }
+                        }
+                    }
+                },
+                series: {{ series[play.id][0] }}
+            });
+            {% endfor %}
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% for play in plays %}
+    <div id="chart_{{ play.id }}" style="width: 854px; margin: 50px;">
+    </div>
+    {% endfor %}
+{% endblock %}

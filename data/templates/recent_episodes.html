@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Recent Episodes - BRDFlix{% endblock %}
+
+{% block css %}
+    {{ super() }}
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+<nav role="navigation" class="clearfix">
+    <ul class="main-nav">
+        <li><a href="/"><span class="navText">Home</span></a></li>
+        <li><a><span class="textA">&gt;</span></a></li>
+        <li><a href="#"><span class="navText">Recent Episodes</span></a></li>
+    </ul>
+</nav>
+
+<br />
+
+{% set eps_per_row = 3 %}
+
+<div class="mainContent">
+    <div class="season_episodes">
+        <table class="season_table">
+            {% for ep in eps %}
+                {% if show_watched or not ep.watched %}
+                    {% if loop.index0 % eps_per_row == 0 %}
+                    <tr>
+                    {% endif %}
+                        <td>
+                           {{ macros.show_and_episode_table(ep, user) }}
+                        </td>
+                    {% if loop.index % eps_per_row == 0 %}
+                    </tr>
+                    {% endif %}
+
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

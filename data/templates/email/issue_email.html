@@ -1,0 +1,49 @@
+<html>
+<body>
+<h2>{{ media.fname }}</h2>
+<h3>Issues</h3>
+<ul>
+    {% if cb_wrong_movie %}
+    <li>Wrong Movie/Episode</li>
+    {% endif %}
+    {% if cb_wrong_audio %}
+    <li>Incorrect Language/Audio</li>
+    {% endif %}
+    {% if cb_video_issue %}
+    <li>Video does not play</li>
+    {% endif %}
+    {% if cb_audio_issue %}
+    <li>Audio does not play</li>
+    {% endif %}
+    {% if cb_video_freeze %}
+    <li>Video freezes at particular point</li>
+    {% endif %}
+    {% if cb_other %}
+    <li>Other</li>
+    {% endif %}
+</ul>
+<h3>Additional Details</h3>
+<span>{{ details }}</span>
+<h3>User Information</h3>
+<table>
+    <tr>
+        <td><strong>User:</strong></td>
+        <td>{{ user.username }}</td>
+    </tr>
+    <tr>
+        <td><strong>IP Address:</strong></td>
+        <td>{{ request_obj.ip_address }}</td>
+    </tr>
+    <tr>
+        <td><strong>Timestamp:</strong></td>
+        <td>{{ request_obj.timestamp }}</td>
+    </tr>
+    <tr>
+        <td><strong>User Agent:</strong></td>
+        <td>{{ request_obj.user_agent }}</td>
+    </tr>
+</table>
+
+</body>
+</html>
+

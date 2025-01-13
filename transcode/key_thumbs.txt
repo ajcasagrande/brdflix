@@ -1,0 +1,1 @@
+"[ffmpeg]" -ss [offset] -i "[fname]" -vf select="eq(pict_type\,I)" -t [duration] -vsync 2 -s 108x60 -f image2 "[outfile]"

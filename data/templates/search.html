@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}BRDFlix{% endblock %}
+
+{% block css %}
+    {{ super() }}
+    <link rel="stylesheet" href="/jqwidgets/styles/jqx.base.css" type="text/css" />
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/jqwidgets/jqxcore.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxexpander.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('#shows').jqxExpander({ width: "96%" });
+        $('#movies').jqxExpander({ width: "96%" });
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+<h1 style="margin-left: 2%;">Search Results:</h1>
+
+<div id="shows" class="all-favorites" style="margin-left: 2%; margin-top: 10px; border: 1px solid black;">
+    <div id="shows_header" class="collapse-header" style="background-color: #333;"><h1>TV Shows</h1></div>
+    <div id="shows_content" class="favorites_content" style="padding-top: 10px; background-color: #D2D1D0;">
+    {% if shows|length > 0 %}
+        {% for show in shows %}
+            {{ macros.tv_poster(show, user) }}
+        {% endfor %}
+    {% else %}
+        <h2>No Results :(</h2>
+    {% endif %}
+    </div>
+</div>
+
+<div id="movies" class="all-favorites" style="margin-left: 2%; margin-top: 10px; border: 1px solid black;">
+    <div id="movies_header" class="collapse-header" style="background-color: #333;"><h1>Movies</h1></div>
+    <div id="movies_content" class="watchlist_content" style="padding-top: 10px; background-color: #D2D1D0;">
+    {% if movies|length > 0 %}
+        {% for movie in movies %}
+            {{ macros.movie_poster(movie, user, loop.index0) }}
+        {% endfor %}
+    {% else %}
+        <h2>No Results :(</h2>
+    {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}XBMC Remote - BRDFlix{% endblock %}
+
+{% block css %}
+    {{ super() }}
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+<h1>{{ server.name }}</h1>
+<button onclick="xbmc_command('play_pause', '{{ server.id }}')">Play/Pause</button>
+<button onclick="xbmc_command('stop', '{{ server.id }}')">Stop</button>
+{% endblock %}

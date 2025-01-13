@@ -1,0 +1,13 @@
+<div id="nowplaying">
+<h3>Now Playing</h3>
+
+#for $p in $procs:
+    #set $mins = $p.duration / 60
+    <div id="np_$p.guid" class="np-item">
+        <strong>Username N/A</strong> <br/>
+        <em><a href="#">$p.fname</a></em> <br/>
+        <span>N/A minutes ago ($mins minutes long)</span>
+    </div> <br/>
+#end for
+
+</div>

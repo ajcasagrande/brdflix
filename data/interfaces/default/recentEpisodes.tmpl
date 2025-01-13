@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+#import brdflix
+#from brdflix import subsonic
+<html>
+<head>
+<title>Recent Episodes</title>
+
+#include $os.path.join($brdflix.TMPL_DIR, "global_css.tmpl")
+
+#include $os.path.join($brdflix.TMPL_DIR, "global_js.tmpl")
+
+</head>
+<body>
+#include $os.path.join($brdflix.TMPL_DIR, "header.tmpl")
+
+<nav role="navigation" class="clearfix">
+    <ul class="main-nav">
+        <li><a href="/"><span class="navText">Home</span></a></li>
+        <li><a><span class="textA">&gt;</span></a></li>
+        <li><a href="#"><span class="navText">Recent Episodes</span></a></li>
+    </ul>
+</nav>
+
+<br />
+
+#set $eps_per_row = 3
+
+<div class="mainContent">
+    <div class="season_episodes">
+        <table class="season_table">
+            #set $i = 0
+            #for $ep in $eps:
+            #if $show_watched or not $ep.watched:
+            #set $epName = ($ep.epName).replace('&', '%26')
+            #set $watched = $ep.watched and $user.watched_status
+            #set $num = "{0}x{1:02}".format($ep.season, $ep.episode)
+
+            #if $i % $eps_per_row == 0:
+            <tr>
+            #end if
+                <td>
+                    <table class="recent_episode_table" width="324px">
+                        <tr>
+                            <td class="ep_table_image">
+                                <a style="text-decoration:none" href="/tv/info?id=$ep.idShow&s=$ep.season">
+                                <img style="background-color: black; display: block;" src="/img/xbmcShowPoster?id=$ep.idShow&h=160" height="130" />
+                                </a>
+                            </td>
+                            <td class="ep_table_image">
+                                <a href="/watch/episode?id=$ep.id">
+                                <img style="background-color: black; display: block;" src="/img/episodeThumb?season=$ep.season&episode=$ep.episode&watched=$watched&thumbpath64=$ep.thumbpath64&h=130&w=232" height="130" width="232" />
+                                </a>
+                            </td>
+                        </tr>
+                        <tr colspan="2">
+                            <td colspan="2" class="recent_ep_title">
+                                <a style="text-decoration: none;" href="/watch/episode?id=$ep.id">
+                                <span>$ep.showName - $num - $ep.epName</span>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                #set $i = $i + 1
+                #if $i % $eps_per_row == 0:
+            </tr>
+            #end if
+
+            #end if
+            #end for
+        </table>
+    </div>
+</div>
+
+#include $os.path.join($brdflix.TMPL_DIR, "footer.tmpl")
+</body>
+</html>

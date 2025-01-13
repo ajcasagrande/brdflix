@@ -1,0 +1,11 @@
+insert into quality (name, bitrate, width, height, admin_only) values ('200 Kbps @ 240p', 200, 428, 240, 0);
+insert into quality (name, bitrate, width, height, admin_only) values ('320 Kbps @ 360p', 320, 640, 360, 0);
+insert into quality (name, bitrate, width, height, admin_only) values ('500 Kbps @ 360p', 500, 640, 360, 0);
+insert into quality (name, bitrate, width, height, admin_only) values ('750 Kbps @ 480p', 750, 854, 480, 0);
+insert into quality (name, bitrate, width, height, admin_only) values ('1 Mbps @ 480p', 1000, 854, 480, 0);
+insert into quality (name, bitrate, width, height, admin_only) values ('1.5 Mbps @ 480p', 1500, 854, 480, 1);
+insert into quality (name, bitrate, width, height, admin_only) values ('2 Mbps @ 480p', 2000, 854, 480, 1);
+insert into quality (name, bitrate, width, height, admin_only) values ('2.5 Mbps @ 720p', 2500, 1280, 720, 1);
+insert into quality (name, bitrate, width, height, admin_only) values ('3 Mbps @ 720p', 3000, 1280, 720, 1);
+insert into quality (name, bitrate, width, height, admin_only) values ('4 Mbps @ 720p', 4000, 1280, 720, 1);
+insert into quality (name, bitrate, width, height, admin_only) values ('5 Mbps @ 1080p', 5000, 1920, 1080, 1);

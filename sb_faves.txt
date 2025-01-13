@@ -1,0 +1,12 @@
+Sickbeard / XBMC favorites:
+- SQLite db
+- Favorites table links tv show sickbeard id and xbmc id
+- May need to let user manually link id's
+- Email / Text notification when a favorite is aired/downloaded. 
+- Possibly choose which favorites are text, which are email?
+- Some sort of dashboard page
+- Admin page
+- Settings page
+- Auto scan sickbeard / xbmc at given intervals?
+- Link with xbmcsonic?
+- Find missing utility? will detect if any episodes are missing from sickbeard (marked as skipped or wanted)

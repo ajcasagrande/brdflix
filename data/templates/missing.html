@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}BRDFlix - Missing Episodes{% endblock %}
+
+{% block css %}
+    {{ super() }}
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $("{{ acc }}").accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: -1000
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+    <div id="accordion_main">
+        {% for mshow in missing %}
+        <h3>{{ mshow.name }} - {{ mshow.total }} Missing</h3>
+        <div>
+            <div id="accordian_{{ mshow.tvdb_id }}">
+                {% for mseason in mshow.seasons|sort_seasons %}
+                {% set count2 = mseason.eps|length %}
+                <h3>Season {{ mseason.num }} - {{ count2 }} Missing</h3>
+                <div>
+                    <table class="missing-table">
+                    {% for m in mseason.eps|sort_season_eps %}
+                        {% set num = "%dx%02d"|format(m.season, m.episode) %}
+                        {% set query = mshow.name|create_query(m.season, m.episode) %}
+                        <tr class="missing {{ m.status|lower }}">
+                            <td style="padding: 0px 14px;"><a href="{{ mshow.tvdb_id|sb_show_details_url }}" target="_blank">{{ num }} - {{ m.epName }}</a></td>
+                            <td style="padding: 0px 6px;"><a href="{{ mshow.tvdb_id|sb_show_details_url }}" target="_blank">{{ m.status }}</a></td>
+                            <td style="padding: 0px 3px;"><a href="/nzb_search?show_name={{ mshow.name }}&season={{ m.season }}&episode={{ m.episode }}" target="_blank">[Search]</a></td>
+                            <td style="padding: 0px 3px;"><a href="/sickbeard/api?cmd=episode.search&tvdbid={{ mshow.tvdb_id }}&season={{ m.season }}&episode={{ m.episode }}" target="_blank">[SickBeard]</a></td>
+                            <td style="padding: 0px 3px;"><a href="http://binsearch.info/index.php?q={{ query }}&m=&max=100&adv_g=&adv_age=5000&adv_sort=date&adv_col=on&minsize=&maxsize=&font=&postdate=" target="_blank">[BinSearch]</a></td>
+                            <td style="padding: 0px 3px;"><a href="http://www.nzbclub.com/search.aspx?q={{ query }}" target="_blank">[NZBClub]</a></td>
+                            <td style="padding: 0px 3px;"><a href="http://www.nzbindex.com/search?q={{ query }}" target="_blank">[NZBIndex]</a></td>
+                            <td style="padding: 0px 3px;"><a href="https://nzbfinder.ws/search/{{ query }}?t=-1&ob=size_desc" target="_blank">[NZBFinder]</a></td>
+                            <td style="padding: 0px 3px;"><a href="http://thepiratebay.se/search/{{ query }}/0/7/0" target="_blank">[PirateBay]</a></td>
+                        </tr>
+                    {% endfor %}
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

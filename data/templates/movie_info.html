@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block css %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="/css/colorbox.3.css" media="screen" />
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/js/jquery.colorbox-min.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $(".youtube").colorbox({iframe:true, innerWidth:854, innerHeight:480, scrolling:false});
+        $(".iframe").colorbox({iframe:true, innerWidth:854, innerHeight:480, scrolling:false});
+        $(".search").colorbox({iframe:true, innerWidth:854, innerHeight:480, scrolling:false});
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>{{ movie.name }}</h1>
+
+    <span>{{ movie.summary }}</span><br/>
+
+    <img style="background-color: black; background-image: url('/img/xbmcImage?path64={{ movie.thumbpath64 }}&w=120&h=180&type=MOVIE');"
+         src="/img/movieOverlay?watched={{ movie.watched }}&rating={{ movie.rating }}&w=120&h=180" width="120" height="180" />
+
+    <a href="/watch/movie?id={{ movie.id }}"><h2>Play Movie</h2></a>
+
+    {% if movie.trailer_youtube_id != "" %}
+    <h2><a class="youtube" href="https://www.youtube.com/embed/{{ movie.trailer_youtube_id }}?autoplay=1" title="{{ movie.name }} (Trailer)">View Trailer (YouTube)</a></h2>
+    {% elif movie.trailer_file and movie.trailer_file != "" %}
+    <h2><a class="iframe" href="/watch/trailer?movieid={{ movie.id }}&embed=True" title="{{ movie.name }} (Trailer)">View Trailer</a><h2>
+    {% endif %}
+    <h2><a class="search" href="http://www.youtube.com/embed?listType=search&list={{ search }}" title="{{ movie.name }} (Search Results)">Search Youtube</a><h2>
+
+    {% if not movie.is_user_watchlist %}
+    <button id="btn_watchlist" onclick="addWatchlistItem('{{ movie.id }}');">Add to Watchlist</button>
+    {% else %}
+    <button id="btn_watchlist" onclick="removeWatchlistItem('{{ movie.id }}');">Remove from Watchlist</button>
+    {% endif %}
+
+    <br /><br/>
+
+    <img src="/img/xbmcImage?path64={{ movie.fanart64 }}&type=FANART" width="500" />
+{% endblock %}

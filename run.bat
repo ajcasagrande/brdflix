@@ -1,0 +1,2 @@
+python BRDFlix.py
+PAUSE

@@ -1,0 +1,1 @@
+"[ffmpeg]" -ss [offset] -i "[fname]" -f image2 -vf fps='fps=1/[frequency]' -s [width]x[height] -t [duration] thumb_%03d.jpg

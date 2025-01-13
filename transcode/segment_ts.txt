@@ -1,0 +1,1 @@
+"[ffmpeg]" -ss [offset] -i "[fname]" -t [duration] [mappings] -vol [volume] -b:a 64k -b:v [bitrate]k -vf scale='[width]:trunc(ow/a/2)*2' -codec:v libx264 -codec:a libmp3lame -f mpegts -ac 2 -preset superfast -threads 0 -g 30 -async 2 -

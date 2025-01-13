@@ -1,0 +1,6 @@
+
+*.pyc
+*.suo
+/.idea
+/brdflix.db
+/logs

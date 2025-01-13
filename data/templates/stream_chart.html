@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {{ super() }}
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/highcharts/js/highcharts.js"></script>
+    <script type="text/javascript" src="/highcharts/js/themes/grid.js"></script>
+
+    <script type="text/javascript">
+        var chart1;
+        var chart2;
+        jQuery(document).ready(function() {
+            Highcharts.setOptions({
+                chart: {
+                    type: 'spline',
+                    events: {
+                        load: function() {
+                            var series = this.series[0];
+                            setInterval(function() {
+                                jQuery.getJSON('/charts/play_details_json?play_id={{ play_id }}', function(data) {
+                                    for (var i=series.data.length; i < data.series[0].data.length; i++){
+                                        var values = [data.series[0].data[i][0], data.series[0].data[i][1]];
+                                        series.addPoint(values, true, false);
+                                    }
+                                });
+                            }, 2000);
+                        }
+                    }
+                },
+                title: {
+                    text: 'This is a test'
+                },
+                xAxis: {
+                    title: {
+                        text: 'Time'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Megabits Per Second (Mbps)'
+                    },
+                    min: 0,
+                    max: 15
+                },
+                tooltip: {
+                    formatter: function() {
+                        return '<b>'+ this.series.name + '</b><br/>'+
+                                this.x +'<br/> '+ this.y + ' Mbps';
+                    }
+                },
+                plotOptions: {
+                    spline: {
+                        lineWidth: 4,
+                        states: {
+                            hover: {
+                                lineWidth: 4
+                            }
+                        },
+                        marker: {
+                            enabled: false,
+                            states: {
+                                hover: {
+                                    enabled: true,
+                                    symbol: 'circle',
+                                    radius: 5,
+                                    lineWidth: 1
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            chart1 = new Highcharts.Chart({
+                chart: {
+                    renderTo: 'chart1'
+                },
+                series: [{ name: '', data: [] }]
+            });
+
+            chart2 = new Highcharts.Chart({
+                chart: {
+                    renderTo: 'chart2'
+                },
+                series: [{ name: '', data: [] }]
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div id="chart1" style="width: 854px; margin: 50px;">
+    </div>
+
+    <div id="chart2" style="width: 854px; margin: 50px;">
+    </div>
+{% endblock %}

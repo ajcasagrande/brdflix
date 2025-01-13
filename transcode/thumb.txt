@@ -1,0 +1,1 @@
+"[ffmpeg]" -ss [offset] -i "[fname]" -s [width]x[height] -f mjpeg -vframes 1 -

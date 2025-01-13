@@ -1,0 +1,5 @@
+WEBVTT
+{% for segment in segments %}
+{{ segment.start_time|vtt_time }} --> {{ segment.end_time|vtt_time }}
+{{ stream_host }}/stream/thumb.jpg?media_id={{ media.id }}&offset={{ segment.mid_time }}
+{% endfor %}

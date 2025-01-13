@@ -1,0 +1,1 @@
+"[ffmpeg]" -ss [offset] -i "[fname]" -f image2 -vframes 1 -

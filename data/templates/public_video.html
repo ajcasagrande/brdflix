@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <style>
+        body {background-color: black;}
+    </style>
+
+    <script type="text/javascript" src="/js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="/jwplayer/jwplayer.js"></script>
+    {# inline js for this template is in a separate file because it is so huge #}
+    {% include 'public_video.js.html' %}
+{% endblock %}
+
+{% block header %}
+    {# DO NOTHING -- WE DO NOT WANT A HEADER FOR EMBED MODE! #}
+{% endblock %}
+
+{% block content %}
+
+<div id="wrapper">
+    <div id="container" style="color:#fff"><h1><a href="http://www.adobe.com/go/getflashplayer" style="color:red;text-decoration:underline;" target="_blank">You need Adobe Flash Player to view this content.&nbsp;&nbsp;Click here to download Flash player</a></h1></div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+    {# DO NOTHING -- WE DO NOT WANT A FOOTER FOR EMBED MODE! #}
+{% endblock %}

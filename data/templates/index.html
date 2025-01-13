@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {{ super() }}
+    <link rel="stylesheet" href="/jqwidgets/styles/jqx.base.css" type="text/css" />
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/jqwidgets/jqxcore.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxexpander.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#favorites').jqxExpander({ width: "96%" });
+            $('#resumes').jqxExpander({ width: "96%" });
+            $('#watchlist').jqxExpander({ width: "96%" });
+            $('#movie_resumes').jqxExpander({ width: "96%" });
+            $('#sickbeard').jqxExpander({ width: "96%" });
+            document.getElementById('q').focus();
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+
+<div id="search" class="clearfix" style="margin-left: 2%; margin-top: 10px; margin-right: 2%;">
+    <form action="/search" style="float:right;">
+        <input id="q" style="width:300px; display: inline; margin-right: 4px;" type="text" name="q" value="" placeholder="Search..." />
+        <button style="display: inline; min-width: 10px; margin-right: 0px;" onclick="search($('#q').val());">Search</button>
+    </form>
+</div>
+
+<div id="favorites" class="all-favorites" style="margin-left: 2%; margin-top: 10px; border: 1px solid black;">
+    <div id="favorites_header" class="collapse-header" style="background-color: #333;"><h1>Favorite Shows</h1></div>
+    <div id="favorites_content" class="favorites_content" style="padding-top: 10px; background-color: #D2D1D0;">
+    {% for show in faves %}
+        {{ macros.tv_poster(show, user) }}
+    {% endfor %}
+    </div>
+</div>
+
+{% if watchlist|length > 0 %}
+<div id="watchlist" class="all-watchlist" style="margin-left: 2%; margin-top: 10px; border: 1px solid black;">
+    <div id="watchlist_header" class="collapse-header" style="background-color: #333;"><h1>Movie Watchlist</h1></div>
+    <div id="watchlist_content" class="watchlist_content" style="padding-top: 10px; background-color: #D2D1D0;">
+        {% for movie in watchlist %}
+            {{ macros.movie_poster(movie, user, loop.index0) }}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if resumes|length > 0 %}
+<div id="resumes" class="all-resumes" style="margin-left: 2%; margin-top: 10px; border: 1px solid black;">
+    <div id="resumes_header" class="collapse-header" style="background-color: #333;"><h1>Resume Episodes</h1></div>
+    <div id="resumes_content" class="resumes_content" style="padding-top: 10px; background-color: #D2D1D0;">
+        <table class="season_table">
+        {% set eps_per_row = 3 %}
+        {% for ep in resumes %}
+            {% if loop.index0 % eps_per_row == 0 %}
+            <tr>
+            {% endif %}
+            <td>
+                {{ macros.show_and_episode_table(ep, user, True) }}
+            </td>
+            {% if loop.index % eps_per_row == 0 %}
+            </tr>
+            {% endif %}
+        {% endfor %}
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% if movie_resumes|length > 0 %}
+    <div id="movie_resumes" class="all-watchlist" style="margin-left: 2%; margin-top: 10px; border: 1px solid black;">
+        <div id="movie_resumes_header" class="collapse-header" style="background-color: #333;"><h1>Resume Movies</h1></div>
+        <div id="movie_resumes_content" class="watchlist_content" style="padding-top: 10px; background-color: #D2D1D0;">
+            {% for movie in movie_resumes %}
+                {{ macros.movie_poster(movie, user, loop.index0, True) }}
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+{% if settings.SICKBEARD.enabled and coming_eps|length > 0 %} {# and user.group.admin_rights %}  #}
+    <div id="sickbeard" class="all-resumes" style="margin-left: 2%; margin-top: 10px;">
+    <div id="sickbeard_header" class="collapse-header" style="background-color: #333;"><h1>Coming Favorites</h1></div>
+    <div id="sickbeard_content" class="sickbeard_content">
+        {% include "include/coming_eps_posters.html" %}
+    </div>
+    </div>
+{% endif %}
+
+<div style="height: 30px;">
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% import 'include/macros.html' as macros %}
+
+<!DOCTYPE html>
+<html>
+<head>
+{% block head %}
+    <title>{% block title %}BRDFlix{% endblock %}</title>
+
+    {% block css %}
+    <link href="/css/jquery.pnotify.default.css" rel="stylesheet" type="text/css" />
+    <link href="/css/jquery-ui-themes-1.10.0/blitzer/jquery-ui.css" rel="stylesheet" type="text/css" />
+    <link href="/css/jquery-ui-themes-1.10.0/blitzer/jquery.ui.theme.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/css/codecanyon.css" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="/css/default.css?{{ RUN_ID }}" media="screen" />
+    {% endblock %}
+
+    {% block script %}
+    <script type="text/javascript" src="/js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui-1.10.0.custom.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.pnotify.min.js"></script>
+    <script type="text/javascript" src="/js/helpers.js?{{ RUN_ID }}"></script>
+    {% if user.group.admin_rights %}
+        <script type="text/javascript" src="/js/admin.js?{{ RUN_ID }}"></script>
+    {% endif %}
+    {% endblock %}
+
+{% endblock %}
+</head>
+<body>
+
+{% block header %}
+    {% include 'include/header.html' %}
+{% endblock %}
+
+<div id="the_content">
+{% block content %}{% endblock %}
+</div>
+
+{% block footer %}
+    {% include 'include/footer.html' %}
+{% endblock %}
+
+</body>
+</html>

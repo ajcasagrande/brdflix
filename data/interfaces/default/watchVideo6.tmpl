@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+#import brdflix
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>BRDFlix</title>
+
+#include $os.path.join($brdflix.TMPL_DIR, "global_css.tmpl")
+<link href="/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css"/>
+
+#include $os.path.join($brdflix.TMPL_DIR, "global_js.tmpl")
+<script type="text/javascript" src="/jwplayer6/jwplayer.js"></script>
+
+#set $use_html5 = False
+
+<script type="text/javascript">
+var ua = navigator.userAgent.toLowerCase();
+var isMobile = ua.indexOf("mobile") > -1;
+
+var runtime = $duration;
+var timeOffset = $offset;
+
+#set $mbr = $brdflix.QUALITIES[$default_quality][1]
+#set $vidSize = $brdflix.QUALITIES[$default_quality][2]
+var maxBitRate = $mbr;
+var videoSize = "$vidSize";
+        
+var vidUrl = "/stream/transcode.flv?path64=$path64&audio_stream=$audio_stream&video_stream=$video_stream&offset="+timeOffset;
+
+var bufferLength;
+var bufferOffset;
+var bufferLocation;
+
+var duration;
+var position;
+
+function setPlayerOffset(offset){
+    //jwplayer().callInternal("jwTimeOffset", offset);
+}
+
+function loadAndPlay(){
+    var vidUrl2 = "/stream/transcode.flv?path64=$path64&offset="+timeOffset+"&bitrate="+maxBitRate+"&width="+videoSize.split('x')[0]+"&audio_stream=$audio_stream&video_stream=$video_stream"
+    console.log(timeOffset);
+    console.log(vidUrl);
+    setPlayerOffset(timeOffset);
+    #if $use_html5:
+    jwplayer().load({ levels: [ { file: vidUrl + '&format=webm', format: 'video/webm' },
+                                { file: vidUrl + '&format=ogv', format: 'video/ogg' },
+                                { file: vidUrl + '&format=flv', format: 'video/x-flv' } ],
+                      duration: runtime, provider: "video" });
+    #else:
+    //jwplayer().load({ levels: [{ file: vidUrl, duration: runtime, 'captions.file': '/stream/srt?path64=$srt64&offset=$offset' }] });
+    jwplayer().load( {
+        captions: [
+            { file: '/stream/srt?path64=$srt64&offset=' + timeOffset, label: 'English' }
+        ],
+        file: vidUrl2,
+        image: "$poster_url",
+        duration: runtime
+    });
+    #end if
+    jwplayer().play();
+    setPlayerOffset(timeOffset);
+}
+
+function changeQuality() {
+    var qualityStr = document.getElementById("theQuality").value;
+    var tokens = qualityStr.split("@");
+    maxBitRate = tokens[0];
+    videoSize = tokens[1];
+    timeOffset = timeOffset + Math.floor(jwplayer().getPosition());
+    loadAndPlay();
+}
+
+jQuery(document).ready(function() {        
+    jwplayer("container").setup({
+        #if $use_html5:
+        levels: [ { file: vidUrl + '&format=webm', format: 'video/webm' },
+                  { file: vidUrl + '&format=ogv', format: 'video/ogg' },
+                  { file: vidUrl + '&format=flv', format: 'video/x-flv' } ],
+        #end if
+        
+        width: 854,
+        height: 480,
+        autostart: "false",
+        
+        #if not $use_html5:
+        primary: "flash",
+        #end if
+
+        analytics: { enabled:false },
+        playlist: [{
+            captions: [
+                { file: '/stream/srt?path64=$srt64&offset=$offset', label: 'English' }
+            ],
+            file: vidUrl,
+            image: "$poster_url",
+            duration: runtime
+        }],
+        plugins: {
+            'timeslidertooltipplugin-3': {
+                'preview':{
+                    'enabled':true,
+                    'path':'http://files.loadvars.com/wizard/files/',
+                    'prefix':'preview'
+                }
+            }
+        }
+    });
+    
+    setPlayerOffset(timeOffset);
+    
+    jwplayer().onBufferChange(function(buffer){
+        bufferLength = (buffer.bufferPercent * buffer.duration) / 100.0;
+        bufferOffset = buffer.position + bufferLength;
+        bufferLocation = timeOffset + bufferOffset;
+        //document.getElementById("buffer").innerHTML = "Buffer: " + getPrettyTime(bufferLocation);
+    });
+    
+    jwplayer().onSeek(function(seek){
+        /*if (seek.offset >= timeOffset && seek.offset <= bufferLocation){
+            //do nothing
+        } else {
+            timeOffset = seek.offset;
+            loadAndPlay();
+        }*/
+        timeOffset = seek.offset;
+        loadAndPlay();
+    });
+    
+    jwplayer().onTime(function(time){
+        var newPosition = Math.round(time.position);
+        if (newPosition != position){
+            position = newPosition;
+            duration = time.duration;
+            pos = timeOffset + position;
+            result = getPrettyTime(timeOffset + position);
+            //document.getElementById("position").innerHTML = result;
+        }
+    });
+   
+    jwplayer().play();
+});
+</script>
+
+</head>
+
+<body>
+
+#if not $embed:
+#include $os.path.join($brdflix.TMPL_DIR, "header.tmpl")
+
+#if $movie:
+    <h1>$movie.name</h1>
+#elif $episode:
+    <h1>$episode.fname</h1>
+#end if
+
+
+#end if
+
+<div id="wrapper">
+    <div id="container" style="color:#fff"><a href="http://www.adobe.com/go/getflashplayer" target="_blank">Get Flash player</a></div>
+</div>
+
+#if not $embed:
+
+<div style="padding-top:0.7em;padding-bottom:0.7em; diplay:inline;">
+    <select id="theQuality" onchange="changeQuality();" style="padding-left:0.25em;padding-right:0.25em;margin-right:0.5em;display: inline;">
+        #set $i = 0
+        #for $quality in $brdflix.QUALITIES:
+            #if $i <= $max_quality:
+                #if $i == $default_quality:
+                    <option value="$quality[1]@$quality[2]" selected="selected">$quality[0]</option>
+                #else:
+                    <option value="$quality[1]@$quality[2]">$quality[0]</option>
+                #end if
+                #set $i = $i + 1
+            #else:
+                #break
+            #end if
+        #end for
+    </select>
+</div>
+
+#if $user.group.admin_rights:
+#set $wtext = "Mark as unwatched" if $watched else "Mark as watched"
+#set $new_status = not $watched
+#if $episodeid is not None:
+<button onclick="setEpisodeWatched('$episodeid', '$new_status');">$wtext</button>
+#end if
+#if $movieid is not None:
+<button onclick="setMovieWatched('$movieid', '$new_status');">$wtext</button>
+#end if
+#end if
+
+<br />
+
+#include $os.path.join($brdflix.TMPL_DIR, "footer.tmpl")
+#end if
+
+</body>
+</html>

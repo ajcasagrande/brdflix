@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+#import brdflix
+#from brdflix import xbmc
+#from brdflix import sickbeard
+<html>
+<head>
+<title>$show.name</title>
+#include $os.path.join($brdflix.TMPL_DIR, "global_css.tmpl")
+#include $os.path.join($brdflix.TMPL_DIR, "global_js.tmpl")
+
+#set $sb_src = sickbeard.getHtmlBaseUrl() + '/home/displayShow?show={0}#content'.format($show.tvdb_id)
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    #if $show.tvdb_id is not None and $initial_season == -1:
+            getNextEpisode('$show.tvdb_id');
+    #end if
+
+    #if $missing.total > 0:
+        var m = '';
+        #for $s in $missing.seasons:
+            m += '<i><strong>Season $s.num:</strong></i><br/>';
+            #for $e in $s.eps:
+                m += '$s.num' + 'x' + '$e.episode - $e.epName <br/>';
+            #end for
+            m += '<br/>';
+        #end for
+        jQuery.pnotify({
+            title: 'Missing Episodes',
+            text: m,
+            type: 'error',
+            styling: 'jqueryui',
+            opacity: 1.0,
+            history: false,
+            delay: 10000
+        });
+    #end if
+
+});
+</script>
+
+</head>
+<body>
+#include $os.path.join($brdflix.TMPL_DIR, "header.tmpl")
+
+<div class="tv_info">
+<table>
+    <tr>
+        <th rowspan="2">
+            <img class="tv_info_fanart" src="/img/xbmcImage?path64=$show.fanart64&h=200&type=FANART" />
+        </th>
+        <td class="show_title">
+            <span>$show.name</span>
+            #set $status_css = sickbeard.statusToCSS($show.status)
+            <span class="$status_css" style="float: right; font-size: 12pt; margin: 5pt;">$show.status</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table>
+                <tr>
+                    <td><p>$show.plot</p></td>
+                </tr>
+                <tr><td>
+                    Total Episodes: $show.totalEps
+                </td></tr>
+                <tr><td>
+                    Watched Episodes: $show.watchedEps
+                </td></tr>
+                <tr><td>
+                    #if $next_ep_date:
+                    $next_ep_date   $next_ep_away.days days away
+                    #end if
+                </td></tr>
+                <tr><td style="float: right;">
+                    #if not $show.is_user_favorite:
+                    <button id="btn_favorite" onclick="addFavoriteShow('$idShow');">Add to Favorites</button>
+                    #else:
+                    <button id="btn_favorite" onclick="removeFavoriteShow('$idShow');">Remove from Favorites</button>
+                    #end if
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</div>
+
+<div id="season_tabs" class="tv_seasons">
+<ul>
+#for $season in $seasons:
+    <li style="display: inline; float: left; margin: 3px"><a style="text-decoration: none;" href="/tv/info?id=$show.id&s=$season.num">
+        #if $season.thumbpath64 != "":
+            #set $imgUrl = "/img/xbmcImage?path64={0}&w=120&h=180&type=TVSHOW".format($season.thumbpath64)
+        #else:
+            #set $imgUrl = "/img/xbmcShowPoster?id={0}&w=120&h=180".format($idShow)
+        #end if
+        #if $user.watched_status:
+        <img style="background-color: black; display: block; background-image: url('$imgUrl');" src="/img/tvshowOverlay?watched=$season.watched&newCount=$season.newEps&w=120&h=180" width="120" height="180" />
+        #else:
+        <img style="background-color: black; display: block;" src="$imgUrl" width="120" height="180" />
+        #end if
+        #set $selected = "" if $initial_season != $season.num else "selectedSeason"
+        #if $season.num == 0:
+        <div class="tvshowName $selected">Specials</div>
+        #else:
+        <div class="tvshowName $selected">Season $season.num</div>
+        #end if
+    </a></li>
+#end for
+</ul>
+
+<span class="clearfix"></span>
+<div style="margin-top: 10px"></div>
+
+#set $eps_per_row = 2
+
+#for $season in $seasons:
+#if $season.num == $initial_season:
+<div id="season_tab_$season.num">
+    <div class="season_episodes">
+    <table class="season_table">
+    #set $i = 0
+    #for $ep in $season.eps:
+        #if $show_watched or not $ep.watched:
+        #set $epName = ($ep.epName).replace('&', '%26')
+        #set $watched = $ep.watched and $user.watched_status
+        #set $num = "{0}x{1:02}".format($ep.season, $ep.episode)
+
+        #if $i % $eps_per_row == 0:
+        <tr>
+        #end if
+        <td>
+
+        <a style="text-decoration:none" href="/watch/episode?id=$ep.id">
+        <table class="episode_table">
+        <tr>
+        <th rowspan="3" class="ep_table_image">
+            <img style="background-color: black; display: block;" src="/img/episodeThumb?season=$ep.season&episode=$ep.episode&watched=$watched&thumbpath64=$ep.thumbpath64" width="200" height="112" />
+        </th>
+        <td class="epTitle">
+            <span>$num - $ep.epName</span>
+        </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">
+                <span>Aired: $ep.firstaired</span>
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">
+                <div class="episode_summary"> </div>
+                #set $qual_css = sickbeard.qualityToCSS($ep.quality)
+                <span class="$qual_css" style="float: left;">$ep.quality</span>
+            </td>
+        </tr>
+        </table>
+        </a>
+
+        </td>
+        #set $i = $i + 1
+        #if $i % $eps_per_row == 0:
+        </tr>
+        #end if
+
+        #end if
+    #end for
+    </table>
+    </div>
+</div>
+#end if
+#end for
+</div>
+
+#include $os.path.join($brdflix.TMPL_DIR, "footer.tmpl")
+</body>
+</html>

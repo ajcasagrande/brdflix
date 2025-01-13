@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+#import brdflix
+<html>
+<head>
+<title>Movies</title>
+
+#include $os.path.join($brdflix.TMPL_DIR, "global_css.tmpl")
+<link rel="stylesheet" href="/jqwidgets/styles/jqx.base.css" type="text/css" />
+
+#include $os.path.join($brdflix.TMPL_DIR, "global_js.tmpl")
+<script type="text/javascript" src="/jqwidgets/jqxcore.js"></script>
+<script type="text/javascript" src="/jqwidgets/jqxexpander.js"></script>
+
+<script type="text/javascript">
+var showWatched = true;
+var genresFilter = null;
+
+function toggleWatched(){
+    showWatched = !showWatched;
+    var btn = document.getElementById("btnWatched");
+    if (showWatched){
+        btn.innerHTML = "Hide Watched";
+    } else {
+        btn.innerHTML = "Show Watched";
+    }
+    filterMovies();
+}
+
+function filterMovies(){
+    var count = 0;
+    var val = document.getElementById('filter').value;
+    var allGroups = document.getElementById('allGroups');
+    for (var g = 0; g < allGroups.children.length; g++) {
+        var allMovies = allGroups.children[g].children[0].children[1].children[0];
+        for (var i = 0; i < allMovies.children.length; i++) {
+            var child = allMovies.children[i];
+            var name = getData(child, "name");
+            var rating = getFloat(child, "rating");
+            var watched = getBool(child, "watched");
+            var visible = name.toLowerCase().indexOf(val.toLowerCase()) != -1;
+            visible = visible && (showWatched || !watched);
+            if (visible && genresFilter != null){
+                visible = false;
+                var genres = getData(child, "genres").split(',');
+                for (var j = 0; j < genres.length; j++){
+                    if (genres[j] == genresFilter){
+                        visible = true;
+                        break;
+                    }
+                }
+            }
+            if (visible){
+                child.style.visibility = "visible";
+                child.style.display = "inline";
+                count++;
+            } else {
+                child.style.visibility = "collapse";
+                child.style.display = "none";
+            }
+        }
+    }
+    document.getElementById('filterCount').innerHTML = count == 1 ? count + " Movie" : count + " Movies";
+}
+
+function filterGenres(v){
+    genresFilter = v;
+    filterMovies();
+}
+
+function clearFilter(){
+    document.getElementById('filter').value = "";
+    genresFilter = null;
+    filterMovies();
+}
+
+jQuery(document).ready(function() {
+    //jQuery('[id^="group_"]').jqxExpander();
+    
+    #for $key in $grps:
+    jQuery('#group_$key').jqxExpander({ width: "95%" });
+    #end for
+    
+    document.getElementById('filter').focus();
+});
+</script>
+</head>
+<body>
+
+#include $os.path.join($brdflix.TMPL_DIR, "header.tmpl")
+
+<nav role="navigation" class="clearfix">
+    <ul class="main-nav">
+        <li>
+            <a href="#">Genres</a>
+            <div class="dropdown">
+                <ul class="meta-links-top">
+                <li><a href="#" onclick="filterGenres(null);">ALL</a></li>
+                </ul>
+                <ul>
+                #for $genre in $all_genres:
+                    <li><a href="#" onclick="filterGenres('$genre');">$genre</a></li>
+                #end for
+                </ul>
+            </div>
+        </li>
+        
+        <li><a href="#">Year</a>
+            <div class="dropdown">
+            <ul>
+                <li><a href="/movies/?sort_method=year&ascending=False">Newest First</a></li>
+                <li><a href="/movies/?sort_method=year&ascending=True">Oldest First</a></li>
+            </ul>
+            </div>
+        </li>
+
+        <li><a href="#">Title</a>
+            <div class="dropdown">
+            <ul>
+                <li><a href="/movies/?sort_method=title&ascending=True">Ascending (A-Z)</a></li>
+                <li><a href="/movies/?sort_method=title&ascending=False">Descending (Z-A)</a></li>
+            </ul>
+            </div>
+        </li>
+        <li><a href="#">Rating</a>
+            <div class="dropdown">
+            <ul>
+                <li><a href="/movies/?sort_method=rating&ascending=False">High - Low</a></li>
+                <li><a href="/movies/?sort_method=rating&ascending=True">Low - High</a></li>
+            </ul>
+            </div>
+        </li>
+        <li><a href="#">Date Added</a>
+            <div class="dropdown">
+            <ul>
+                <li><a href="/movies/?sort_method=dateadded&ascending=False">Newest First</a></li>
+                <li><a href="/movies/?sort_method=dateadded&ascending=True">Oldest First</a></li>                
+            </ul>
+            </div>
+        </li>
+        <li><a href="#">Runtime</a>
+            <div class="dropdown">
+            <ul>
+                <li><a href="/movies/?sort_method=time&ascending=False">Longest First</a></li>
+                <li><a href="/movies/?sort_method=time&ascending=True">Shortest First</a></li>
+            </ul>
+            </div>
+        </li>
+                
+        <li><a href="#">Misc</a>
+            <div class="dropdown">
+            <ul>
+                <li><a href="/movies/?sort_method=lastplayed&ascending=False">Recently Played</a></li>
+                <li><a href="/movies/?sort_method=random">Random</a></li>
+            </ul>
+            </div>
+        </li>
+        
+    <li class="search-container">
+        <div>
+        <input id="filter" style="width:200px; display: inline;" type="text" name="filter" value="" placeholder="Filter..." onkeyup="filterMovies();" />
+        <button style="display: inline; min-width: 10px;" onclick="clearFilter();">Clear</button>
+        #if $watched_status:
+        <button id="btnWatched" style="min-width: 10px;" onclick="toggleWatched();">Hide Watched</button>
+        #end if
+        #set $allCount = len($movies)
+        <span class="labelCount" id="filterCount">$allCount Movies</span>
+        </div>
+    </li>
+</ul>
+</nav>
+
+<br />
+
+<div id="allGroups">
+#for $key in sorted($grps.iterkeys(), reverse=True):
+#set $grpCount = len($grps[$key])
+<div id="group_$key" style="margin: 5px;">
+#set $keyText = str($key) if $key >= 2000 else str(key) + "'s"
+<div id="group_header_$key"><h1>$keyText ($grpCount Movies)</h1></div>
+<div id="group_content_$key">
+#set $i = 0
+#for $movie in $grps[$key]:
+    #if $show_watched or not $movie.watched:
+        #set $gs = ','.join($movie.genres)
+        <div id="movie_$movie.id" class="moviePoster" 
+            data-name="$movie.name" data-rating="$movie.rating" data-id="$movie.id"
+            data-watched="$movie.watched" data-genres="$gs" data-order="$i">
+        <a style="text-decoration:none" href="/movies/info?idMovie=$movie.id">
+        #set $watched = $movie.watched and $watched_status
+        <img style="background-color: black; background-image: url('/img/xbmcImage?path64=$movie.thumbpath64&w=120&h=180&type=MOVIE');" 
+            src="/img/movieOverlay?watched=$watched&rating=$movie.rating&w=120&h=180" width="120" height="180" />
+        <div class="movieName">$movie.name</div>
+        </a>
+        </div>
+    #end if
+    #set $i = $i + 1
+#end for
+</div>
+</div>
+#end for
+</div>
+
+#include $os.path.join($brdflix.TMPL_DIR, "footer.tmpl")
+
+</body>
+</html>

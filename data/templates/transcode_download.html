@@ -1,0 +1,24 @@
+<html>
+<body>
+<script type="text/javascript" src="/js/jquery-1.6.2.min.js"></script>
+<script>
+function close_it(){
+    var frame = document.getElementById("download_frame");
+    if (frame.src.indexOf('/user/login') == -1){
+        console.log('Closing window');
+        console.log(frame.src);
+        //var ww = window.open('/', '_self');
+        //ww.close();
+    } else {
+        console.log('Not closing window yet');
+        setTimeout(close_it, 1000);
+    }
+}
+$(document).ready(function(){
+    setTimeout(close_it, 3000);
+});
+</script>
+<iframe id="download_frame" src="{{ url }}" frameborder="0" width="100%" height="100%" scrolling="no">
+</iframe>
+</body>
+</html>

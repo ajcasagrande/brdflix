@@ -1,0 +1,19 @@
+"{{ffmpeg}}"
+-ss {{offset}}
+-i "{{fname}}"
+{{mappings}}
+-vol {{volume}}
+-b:v {{bitrate}}k
+{% if crop_3d_sbs %}
+    -vf crop='{{(media.width/2.0)|round|int}}:{{media.height}}:0:0'
+{% endif %}
+-s {{width}}x{{height}}
+-ac {{channels}}
+-v 0
+-f ogg
+-c:v libtheora
+-c:a libvorbis
+-g 30
+-ab 160000
+-threads 0{#{{threads}}#}
+-{# this last - means to output to stdout #}

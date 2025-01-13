@@ -1,0 +1,16 @@
+{% import 'include/macros.html' as macros %}
+
+{% for grp in coming_grps %}
+    <h2 class="day">{{ grp.title }}</h2>
+    {% if grp.eps|length > 0 %}
+        {% for ep in grp.eps %}
+            {{ macros.coming_banner(ep) }}
+        {% endfor %}
+    {% else %}
+        <div class="no_episodes"><h2>No Episodes</h2></div>
+    {% endif %}
+{% endfor %}
+
+{#{% for ep in coming_eps %}#}
+{#    {{ create_coming_banner(ep) }}#}
+{#{% endfor %}#}

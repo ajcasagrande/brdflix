@@ -1,0 +1,17 @@
+<div id="recentplays">
+<h1>Recent Plays</h1>
+
+#for $p in $recent_plays:
+    #set $mins = int(round($p.duration / 60.0))
+    #set $play_mins = long(round(int($p.total_time) / 60.0, 2))
+    #set $mbytes = round(long($p.total_bytes) / 1024.0 / 1024.0, 2)
+    <div id="np_0" class="np-item">
+        <h3 style="display:inline;"><em><a href="$p.request_url">$p.fname</a></em></h3><br/>
+        <span>$p.user_agent</span><br/>
+        <strong>$p.username [$p.ip_address] [$p.port]</strong><br/>
+        <span>$p.start_time ($mins minutes long)</span><br/>
+        <span>$play_mins Minutes Transferring ($mbytes Megabytes) ($p.avg_mbps Average Mbps)</span><br/>
+    </div> <br/>
+#end for
+
+</div>

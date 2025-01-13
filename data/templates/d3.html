@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {{ super() }}
+
+    <style>
+        #chart-container {
+            width: 1000px;
+            margin: 0 auto 50px auto;
+            background: rgba(255,255,255,0.5);
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+            padding: 20px 30px;
+        }
+
+        #chart-container h2 {
+            color: #444;
+            margin: 0 0 10px;
+            font-weight: 300;
+            padding: 10px;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+            font-size: 24px;
+        }
+
+        svg {
+            font-family: 'Lato', Arial, serif;
+            font-size: 10px;
+            font-weight: 700;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+        }
+
+        text.instructions {
+            font-size: 16px;
+            text-align: center;
+        }
+        .axis path, .axis line {
+            fill: none;
+            stroke: #fff;
+            shape-rendering: crispEdges;
+        }
+
+        .brush .extent {
+            stroke: #f09f8c;
+            fill-opacity: .125;
+            shape-rendering: crispEdges;
+        }
+
+        .grid-background {
+            fill: #ddd;
+        }
+
+        .grid line {
+            stroke: #fff;
+        }
+
+        .grid text {
+            display: none;
+        }
+
+        .axis line {
+            stroke: #fff;
+        }
+
+        .axis path,
+        .grid path {
+            display: none;
+        }
+
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: lightgrey;
+            shape-rendering: crispEdges;
+        }
+
+        .x.axis path {
+            display: none;
+        }
+
+        .line {
+            fill: none;
+            stroke-width: 4px;
+        }
+        .legend rect {
+            fill:white;
+            stroke:black;
+            opacity:0.8;
+        }
+
+        .grid .tick {
+            stroke: lightgrey;
+            opacity: 0.7;
+        }
+        .grid path {
+            stroke-width: 0;
+        }
+
+        div.tooltip {
+            position: absolute;
+            text-align: left;
+            width: 200px;
+            height: 200px;
+            padding: 2px;
+            font: 12px sans-serif;
+            font-style: bold;
+            background: lightgreen;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+    </style>
+
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/js/d3.min.js"></script>
+    
+    {% include 'd3.js.html' %}
+{% endblock %}
+
+{% block content %}
+<div id="streams_chart_div">
+</div>
+{% endblock %}

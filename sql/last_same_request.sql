@@ -1,0 +1,1 @@
+select * from requests where user_id = 1 and request='/tv/info?id=265' and method='GET' order by `timestamp` desc limit 1

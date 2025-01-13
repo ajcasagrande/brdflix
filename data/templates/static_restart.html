@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {{ super() }}
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript">
+        function performRestart(){
+            var url = '/admin/restart_json'
+            $.getJSON(url, function(data) {
+                var res = data.res;
+                if (res == "OK") {
+                    jQuery.pnotify({
+                        title: 'Success',
+                        text: 'Performing restart',
+                        type: 'success',
+                        styling: 'jqueryui',
+                        opacity: 1.0,
+                        history: false,
+                        delay: 1000
+                    });
+                } else {
+                    $.pnotify({
+                        title: 'Failure',
+                        text: 'Could not perform restart.\nResult: ' + res,
+                        type: 'error',
+                        styling: 'jqueryui',
+                        opacity: 1.0,
+                        history: false,
+                        delay: 2000
+                    });
+                }
+            });
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <button onclick="performRestart();" style="margin:50px;font-size:48px;height:100px;">Perform Restart</button>
+{% endblock %}

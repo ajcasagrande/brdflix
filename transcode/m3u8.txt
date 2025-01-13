@@ -1,0 +1,1 @@
+"[ffmpeg_hls]" -ss [offset] -i "[fname]" [mappings] [srt] -vol [volume] -b:a 64k -b:v [bitrate]k -vf scale='[width]:trunc(ow/a/2)*2' -codec:v libx264 -codec:a libmp3lame -f segment -segment_list out.m3u8 -segment_list_flags +live -segment_time 4 -ac 2 -preset superfast -threads 2 -g 30 -async 2 out_%03d.ts

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% set use_html5 = True %}
+
+{% block css %}
+    {{ super() }}
+    <link href='/js/cb/style.css' rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" type="text/css" href="/css/colorbox.3.css" media="screen" />
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/js/jquery-ui-messageBox.js"></script>
+    {% if use_html5 %}
+    <script type="text/javascript" src="/jwplayer_6_8/jwplayer.js?{{ RUN_ID }}"></script>
+    {% else %}
+    <script type="text/javascript" src="/jwplayer/jwplayer.js"></script>
+    {% endif %}
+    <script type='text/javascript' src='/js/cb/jquery/iphone-style-checkboxes.js'></script>
+    <script type="text/javascript" src="/js/jquery.colorbox-min.js"></script>
+
+    {# inline js for this template is in a separate file because it is so huge #}
+    {% if use_html5 %}
+        {% include 'watch_video_html5.js.html' %}
+    {% else %}
+        {% include 'watch_video.js.html' %}
+    {% endif %}
+{% endblock %}
+
+{% block header %}
+    {% if embed %}
+        {# DO NOTHING -- WE DO NOT WANT A HEADER FOR EMBED MODE! #}
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if not embed %}
+    {% if movie %}
+        <h1>{{ movie.name }}</h1>
+    {% elif episode %}
+        <h1>{{ episode.fname }}</h1>
+    {% endif %}
+{% endif %}
+
+<div id="wrapper">
+    <div id="container" style="color:#fff"><h1><a href="http://www.adobe.com/go/getflashplayer" style="color:red;text-decoration:underline;" target="_blank">You need Adobe Flash Player to view this content.&nbsp;&nbsp;Click here to download Flash player</a></h1></div>
+</div>
+
+{% if not embed %}
+    <div style="padding-top:0.7em;padding-bottom:0.7em; diplay:inline;">
+        <form>
+        <select id="theQuality" onchange="changeQuality();" style="padding-left:0.25em;padding-right:0.25em;margin-right:0.5em;display: inline;float:left">
+            {% for quality in qualities %}
+                <option id="quality_{{quality.id}}" value="{{quality.id}}">{{quality.name}}</option>
+            {% endfor %}
+        </select>
+
+        {% if episodeid %}
+        <input id="cbAutoPlay" type="checkbox" style="display:inline;float:left;margin-left: 20em" {{ 'checked="checked"' if autoplay else '' }} />
+        {% endif %}
+        </form>
+    </div>
+
+    <span><b>Volume Boost:</b></span>
+    <form>
+        <div id="radio_volume">
+            {{ macros.radio_vol('None', 256, vol_boost) }}
+            {{ macros.radio_vol('Low', 512, vol_boost) }}
+            {{ macros.radio_vol('Med', 1024, vol_boost) }}
+            {{ macros.radio_vol('High', 2048, vol_boost) }}
+            {{ macros.radio_vol('Super', 3072, vol_boost) }}
+        </div>
+    </form>
+
+    <br/>
+
+    {% if user.group.admin_rights %}
+        {% set wtext = "Mark as unwatched" if watched else "Mark as watched" %}
+        {% set new_status = not watched %}
+        {% if episodeid %}
+            <button onclick="setEpisodeWatched('{{episodeid}}', '{{new_status}}');">{{wtext}}</button>
+        {% endif %}
+        {% if movieid %}
+            <button onclick="setMovieWatched('{{movieid}}', '{{new_status}}');">{{wtext}}</button>
+        {% endif %}
+    {% endif %}
+
+    <br />
+
+    {% if episodeid %}
+    <br /><br />
+    <table>
+        <tr><td>
+        <div id="prev_ep" class="prev_ep">
+            {% if prevEp %}
+                <h3 style="display:inline;"><a href="/watch/episode?id={{ prevEp.id }}">Previous Episode:</a></h3>
+                {{ macros.show_and_episode_table(prevEp, user) }}
+            {% else %}
+                <h3 style="display:inline;">Previous Episode:</h3>
+                <h3 style="color:red;">N/A</h3>
+            {% endif %}
+        </div>
+        </td>
+        <td style="padding-left: 20px"></td>
+        <td><div style="width:2px;height:211px;background-color:black;float:left;margin-bottom:6px"></div></td>
+        <td style="padding-left: 20px">
+        <div id="next_ep" class="next_ep">
+            {% if nextEp %}
+                <h3 style="display:inline;"><a href="/watch/episode?id={{ nextEp.id }}">Next Episode:</a></h3>
+                {{ macros.show_and_episode_table(nextEp, user) }}
+            {% else %}
+                <h3 style="display:inline;">Next Episode:</h3>
+                <h3 style="color:red;">N/A</h3>
+            {% endif %}
+        </div>
+        </td></tr>
+    </table>
+
+    {% endif %}
+
+    {% if resume %}
+        <div id="resume-dialog" title="Resume?">
+            <p>Would you like to resume playback at {{resume.getPrettyOffset()}} ({{resume.getSaveType()}})?</p>
+        </div>
+    {% endif %}
+
+    
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+    {% if embed %}
+        {# DO NOTHING -- WE DO NOT WANT A FOOTER FOR EMBED MODE! #}
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}

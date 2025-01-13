@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+#import brdflix
+#from brdflix.datatypes import *
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>BRDFlix</title>
+
+#include $os.path.join($brdflix.TMPL_DIR, "global_css.tmpl")
+
+#include $os.path.join($brdflix.TMPL_DIR, "global_js.tmpl")
+<script type="text/javascript" src="/js/jquery-ui-messageBox.js"></script>
+<script type="text/javascript" src="/jwplayer/jwplayer.js"></script>
+
+#set $use_html5 = False
+
+<script type="text/javascript">
+var ua = navigator.userAgent.toLowerCase();
+var isMobile = ua.indexOf("mobile") > -1;
+
+var runtime = $media.duration;
+var timeOffset = $offset;
+
+var quality = $default_quality_id;
+
+var bufferLength;
+var bufferOffset;
+var bufferLocation;
+
+var vol_boost = 1024;
+
+var started = false;
+
+var duration;
+var position;
+var pos;
+
+var resume_interval=10;
+var last_save_pos=0;
+
+function setPlayerOffset(offset){
+    jwplayer().callInternal("jwTimeOffset", offset);
+}
+
+function loadAndPlay(){
+    started = true;
+    vidUrl = "/stream/transcode?play_id=$play_id&media_id=$media.id&offset="+timeOffset+"&quality="+quality+"&volume="+vol_boost
+    setPlayerOffset(timeOffset);
+    #if $use_html5:
+        jwplayer().load({ levels: [ { file: vidUrl + '&format=webm', format: 'video/webm' },
+                                    { file: vidUrl + '&format=ogv', format: 'video/ogg' },
+                                    { file: vidUrl + '&format=flv', format: 'video/x-flv' } ],
+                          duration: runtime, provider: "video" });
+    #else:
+        #if $show_srt:
+            jwplayer().load({ file: vidUrl, duration: runtime, provider: "video", 'captions.file': '/stream/srt?path64=$srt64&offset=$offset' });
+        #else:
+            jwplayer().load({ file: vidUrl, duration: runtime, provider: "video" });
+        #end if
+    #end if
+    jwplayer().play();
+    setPlayerOffset(timeOffset);
+}
+
+function changeQuality() {
+    if (started){
+        quality = parseInt(document.getElementById("theQuality").value);
+        setCookie('$brdflix.QUALITY_COOKIE', quality, 30);
+        var new_offset = parseFloat(timeOffset) + Math.floor(jwplayer().getPosition());
+        smart_seek(new_offset, 'False')
+    }
+}
+
+function setVolumeBoost(vol){
+    if (started){
+        vol_boost = vol;
+        var new_offset = parseFloat(timeOffset) + Math.floor(jwplayer().getPosition());
+        smart_seek(new_offset, 'False')
+    }
+}
+
+function smart_seek(offset, allow_over){
+    url="/watch/get_seek_time?media_id=$media.id&s=" + offset + "&allow_over=" + allow_over
+    jQuery.getJSON(url, function(data) {
+        var s = data.res.s;
+        if (s) {
+            console.log(s);
+            timeOffset = s
+            loadAndPlay();
+        } else {
+            timeOffset = offset;
+            loadAndPlay();
+        }
+    });
+}
+
+var skin = "/jwplayer/skins/newtubedark/newtubedark.zip";
+if (isMobile){
+    skin = "/jwplayer/newtubedark_mobile.zip";
+}
+
+jQuery(document).ready(function() {
+    #if $resume is not None:
+    var resume_time = getPrettyTime($resume.offset);
+    jQuery('#resume-dialog').dialog({
+        resizable: false,
+        height: 175,
+        modal: true,
+        buttons: {
+            "Resume" : function() {
+                jQuery( this ).dialog( "close" );
+                smart_seek($resume.offset, 'False');
+            },
+            "Start over": function() {
+                jQuery( this ).dialog( "close" );
+                jwplayer().play();
+                started = true;
+            }
+        }
+    });
+    #end if
+
+    var vidUrl = "/stream/transcode?play_id=$play_id&media_id=$media.id&quality="+quality+"&offset="+timeOffset+"&volume="+vol_boost;
+
+    var tq = document.getElementById("quality_" + quality.toString());
+    if (tq != null){
+        tq.selected = true;
+    }
+
+    jQuery("#radio_volume").buttonset();
+
+    jwplayer("container").setup({
+        #if $use_html5:
+        levels: [ { file: vidUrl + '&format=webm', format: 'video/webm' },
+                  { file: vidUrl + '&format=ogv', format: 'video/ogg' },
+                  { file: vidUrl + '&format=flv', format: 'video/x-flv' } ],
+        #else:
+        file: vidUrl,
+        #end if
+        image: "$poster_url",
+        width: 854,
+        height: 509,
+        skin: skin,
+        duration: runtime,
+        provider: "video",
+        autostart: "false",
+        
+        #if $use_html5:
+        modes: [ { type: 'html5' },
+                 { type: 'flash', src: "/jwplayer/player.swf" } ],
+        #else:
+        modes: [ { type: 'flash', src: "/jwplayer/player.swf" } ],
+        #end if
+
+        #if not $embed:
+        controlbar: "bottom",
+        #else:
+        controlbar: "over",
+        #end if
+        
+        plugins: {
+            //'backstroke-1': { }, //allows keyboard controls, but player must be selected
+            #if $show_srt:
+            'captions-2': {
+                file: '/stream/srt?path64=$srt64&offset=$offset'
+            },
+            #end if
+            #if $enable_thumbs:
+            'timeslidertooltipplugin-3': {
+                displayhours: true,
+                preview: {
+                    enabled: true,
+                    prefix: 'name=',
+ 
+                    path: '/stream/preview?media_id=$media.id&frequency=$thumb_freq&',
+                    frequency: $thumb_freq,
+                    linelength: 1,
+                    spritelength: 1,
+ 
+                    //path: '/stream/preview_multi?media_id=$media.id&frequency=1&linelength=5&spritelength=10&',
+                    //frequency: 1,
+                    //linelength: 5,
+                    //spritelength: 10,
+                }
+            }
+            #end if
+        }
+    });
+    
+    setPlayerOffset(timeOffset);
+    
+    jwplayer().onBufferChange(function(buffer){
+        bufferLength = (buffer.bufferPercent * buffer.duration) / 100.0;
+        bufferOffset = buffer.position + bufferLength;
+        bufferLocation = timeOffset + bufferOffset;
+        //document.getElementById("buffer").innerHTML = "Buffer: " + getPrettyTime(bufferLocation);
+    });
+    
+    jwplayer().onSeek(function(seek){
+        /*if (seek.offset >= timeOffset && seek.offset <= bufferLocation){
+            //do nothing
+        } else {
+            timeOffset = seek.offset;
+            loadAndPlay();
+        }*/
+
+        smart_seek(seek.offset, 'True');
+    });
+    
+    jwplayer().onTime(function(time){
+        var newPosition = Math.round(time.position);
+        if (newPosition != position){
+            position = newPosition;
+            duration = time.duration;
+            pos = parseFloat(timeOffset) + parseFloat(position);
+
+            // Auto save every resume_interval seconds a resume point.
+            // The absolute value also makes it so if the user seeks backwards
+            // the resume point is remembered.
+            if (Math.abs(pos - last_save_pos) >= resume_interval){
+                addResume(false, $user.id, $media.id, pos, 'True');
+                last_save_pos = pos;
+            }
+
+            result = getPrettyTime(timeOffset + position);
+            //document.getElementById("position").innerHTML = result;
+        }
+    });
+
+    #if $resume is None:
+    setPlayerOffset(timeOffset);
+    jwplayer().play();
+    started = true;
+    #end if
+});
+</script>
+
+</head>
+
+<body>
+
+#if not $embed:
+#include $os.path.join($brdflix.TMPL_DIR, "header.tmpl")
+
+#if $movie:
+    <h1>$movie.name</h1>
+#elif $episode:
+    <h1>$episode.fname</h1>
+#end if
+
+
+#end if
+
+<div id="wrapper">
+    <div id="container" style="color:#fff"><a href="http://www.adobe.com/go/getflashplayer" target="_blank">Get Flash player</a></div>
+</div>
+
+#if not $embed:
+
+<div style="padding-top:0.7em;padding-bottom:0.7em; diplay:inline;">
+    <select id="theQuality" onchange="changeQuality();" style="padding-left:0.25em;padding-right:0.25em;margin-right:0.5em;display: inline;">
+        #for $quality in $qualities:
+            <option id="quality_$quality.id" value="$quality.id">$quality.name</option>
+        #end for
+    </select>
+</div>
+
+<span>Volume Boost:</span>
+<form>
+    <div id="radio_volume">
+        <input type="radio" id="volume_none" name="radio" onclick="setVolumeBoost(256);" /><label for="volume_none">None</label>
+        <input type="radio" id="volume_low" name="radio" onclick="setVolumeBoost(512);" /><label for="volume_low">Low</label>
+        <input type="radio" id="volume_med" name="radio" checked="checked" onclick="setVolumeBoost(1024);"/><label for="volume_med">Medium</label>
+        <input type="radio" id="volume_high" name="radio" onclick="setVolumeBoost(2048);"/><label for="volume_high">High</label>
+        <input type="radio" id="volume_super" name="radio" onclick="setVolumeBoost(3072);"/><label for="volume_super">Super</label>
+    </div>
+</form>
+
+#if $user.group.admin_rights:
+#set $wtext = "Mark as unwatched" if $watched else "Mark as watched"
+#set $new_status = not $watched
+#if $episodeid is not None:
+<button onclick="setEpisodeWatched('$episodeid', '$new_status');">$wtext</button>
+#end if
+#if $movieid is not None:
+<button onclick="setMovieWatched('$movieid', '$new_status');">$wtext</button>
+#end if
+#end if
+
+<button onclick="addResume(true, $user.id, $media.id, pos, 'True');">Add Resume Point Here</button>
+
+<br />
+
+#include $os.path.join($brdflix.TMPL_DIR, "footer.tmpl")
+#end if
+
+#if $resume is not None:
+<div id="resume-dialog" title="Resume?">
+    <p>Would you like to resume playback at $resume.getPrettyOffset() ($resume.getSaveType())?</p>
+</div>
+#end if
+
+</body>
+</html>

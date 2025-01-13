@@ -1,0 +1,1 @@
+"[ffmpeg]" -ss [offset] -i "[fname]" -map 0:[srt_stream] -vn -an -scodec srt -threads 0 -y "[outfile]"

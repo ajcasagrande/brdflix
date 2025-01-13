@@ -1,0 +1,18 @@
+"{{ffmpeg}}"
+-ss {{offset}}
+-i "{{fname}}"
+{{mappings}}
+-vol {{volume}}
+-b:v {{bitrate}}k
+{% if crop_3d_sbs %}
+    -vf crop='{{(media.width/2.0)|round|int}}:{{media.height}}:0:0'
+{% endif %}
+-s {{width}}x{{height}}
+-ar 44100
+-ac {{channels}}
+-v 0
+-f flv
+-vcodec libx264
+-preset superfast
+-threads {{threads}}
+-{# this last - means to output to stdout #}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Upcoming - BRDFlix{% endblock %}
+
+{% block css %}
+    {{ super() }}
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="all-upcoming">
+{% include "include/coming_eps_banners.html" %}
+</div>
+{% endblock %}

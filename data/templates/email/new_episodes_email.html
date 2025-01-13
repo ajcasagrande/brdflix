@@ -1,0 +1,28 @@
+<html>
+<body>
+
+<h1>Hi {{ username }},</h1>
+<h2 style="color:black;">New episodes were added to BRDFlix that match your favorites!</h2>
+
+{% for ep in eps %}
+<table>
+    <tr>
+        <td width="1px"><a href="{{ base_url }}/tv/info?id={{ ep.idShow }}&s={{ ep.season }}"><img src="{{ base_url }}/img/xbmcShowPoster?id={{ ep.idShow }}&h=160" /></a></td>
+        <td><a href="{{ base_url }}/watch/episode?id={{ ep.id }}"><img src="{{ base_url }}/img/episodeThumb?season={{ ep.season }}&episode={{ ep.episode }}&watched=False&thumbpath64={{ ep.thumbpath64 }}=&h=160"/></a></td>
+        <td>                                        </td>
+    </tr>
+    <tr>
+        <td style="color:black;" colspan="3"><a style="color: black; text-decoration: none;" href="{{ base_url }}/watch/episode?id={{ ep.id }}"><h2>{{ ep }}</h2></a></td>
+    </tr>
+</table>
+<br/>
+<br/>
+{% endfor %}
+
+<h2>
+Sincerely,<br/>
+The BRDFlix Bot
+</h2>
+</body>
+</html>
+

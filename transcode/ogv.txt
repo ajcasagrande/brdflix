@@ -1,0 +1,1 @@
+"[ffmpeg]" -ss [offset] -i "[fname]" [mappings] [srt] -vol [volume] -b [bitrate]k -vf scale='[width]:trunc(ow/a/2)*2' -ar 44100 -ac 2 -v 0 -f ogg -vcodec libtheora -acodec libvorbis -preset superfast -threads 12 -

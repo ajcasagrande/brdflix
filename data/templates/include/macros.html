@@ -1,0 +1,205 @@
+{% macro radio_vol(name, value, current_vol=0, force_checked=False) -%}
+    <input type="radio" id="volume_{{name}}" name="radio" {{'checked="checked"' if force_checked or current_vol == value else ''}} onclick="setVolumeBoost({{value}});" /><label for="volume_{{name}}">{{name}}</label>
+{%- endmacro %}
+
+{% macro option_vol(name, value, checked=False) -%}
+    <option {{'selected="selected"' if checked else ''}} value="{{ value}}">{{name}}</option>
+{%- endmacro %}
+
+{% macro coming_banner(ep) -%}
+    <div class="{{ ep.type|sb_coming_css }}">
+        <div class="tvshowDiv">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <th >
+        <span class="tvshowTitle"><a href="/tv/info?id={{ ep.idShow }}">{{ ep.showName }} [{{ ep.days_away|pretty_days_away }}]
+        </a></span>
+        <span class="tvshowTitleIcons">
+            <a href="http://thetvdb.com/?tab=series&amp;id={{ ep.tvdb_id }}" rel="noreferrer" onclick="window.open('http://derefer.me/?' + this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id={{ ep.tvdb_id }}"><img alt="[tvdb]" height="16" width="16" src="/images/thetvdb16.png" /></a>
+        </span>
+                    </th>
+                </tr>
+                <tr>
+                    <th class="nobg" style="background-color: #efefef;">
+                        <a href="/tv/info?id={{ ep.idShow }}"><img alt="" class="bannerThumb" src="/sickbeard/banner?id={{ ep.tvdb_id }}" /></a>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="nextEp">
+                        <span class="title">Next Episode:</span> <span>{{ "%dx%02d"|format(ep.season, ep.episode) }} - {{ ep.epName }} ({{ ep.firstaired }})</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">
+                        <span class="title">Airs:</span> <span>{{ ep.airtime }} on {{ ep.network }}</span>
+                        [<span class="title">{{ ep.quality }}</span>]<br />
+                        <img class="epSummaryTrigger" src="/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div style="visibility: collapse;" class="epSummary">{# {{ ep.summary }} #}</div>
+                        <br/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro tv_poster(show, user) -%}
+    <div id="show_{{show.id}}" class="tvposter" data-name="{{show.name}}" data-watched="{{show.watched}}">
+        <a style="text-decoration:none" href="/tv/info?id={{show.id}}">
+            {% if user.watched_status %}
+                <img style="background-color: black; display: block; background-image: url('/img/xbmcImage?path64={{show.thumbpath64}}&w=120&h=180&type=TVSHOW');" src="/img/tvshowOverlay?watched={{show.watched}}&newCount={{show.newEps}}&w=120&h=180" width="120" height="180" border="0" />
+            {% else %}
+                <img style="background-color: black; display: block;" src="/img/xbmcImage?path64={{show.thumbpath64}}&w=120&h=180&type=TVSHOW" width="120" height="180" border="0" />
+            {% endif %}
+            <div class="tvshowName">{{show.name}}</div></a>
+    </div>
+{%- endmacro %}
+
+{% macro movie_poster_basic(movie) -%}
+    <div id="movie_{{movie.id}}" class="moviePoster" data-name="{{movie.name}}" data-rating="{{movie.rating}}" data-id="{{movie.id}}">
+        <a style="text-decoration:none" href="/movies/info?idMovie={{movie.id}}">
+            <img style="background-color: black; display: block; background-image: url('/img/xbmcImage?path64={{movie.thumbpath64}}&w=120&h=180&type=MOVIE');" src="/img/movieOverlay?watched=False&rating={{movie.rating}}&w=120&h=180" width="120" height="180" />
+            <div class="movieName">{{movie.name}}</div></a>
+    </div>
+{%- endmacro %}
+
+{% macro movie_poster(movie, user, index, resume=False) -%}
+<div id="movie_{{ movie.id }}" class="moviePoster"
+     data-name="{{ movie.name }}" data-rating="{{ movie.rating }}" data-id="{{ movie.id }}"
+     data-watched="{{ movie.watched }}" data-genres="{{ movie.genres|join(',') }}" data-order="{{ index }}">
+    <a style="text-decoration:none" href="{{ '/movies/info?idMovie=%d'|format(movie.id) if not resume else '/watch/movie?id=%d&resume=True'|format(movie.id)  }}">
+        <img style="background-color: black; display: block; background-image: url('/img/xbmcImage?path64={{ movie.thumbpath64 }}&w=120&h=180&type=MOVIE');"
+             src="/img/movieOverlay?watched={{ movie.watched and user.watched_status }}&rating={{ movie.rating }}&w=120&h=180" width="120" height="180" />
+        <div class="movieName">{{ movie.name }}</div>
+    </a>
+</div>
+{%- endmacro %}
+
+{% macro show_and_episode_table(ep, user, resume=False) -%}
+    {% set watched = ep.watched and user.watched_status %}
+    {% set epName = ep.epName|replace('&', '%26') %}
+    {% set num = "%dx%02d"|format(ep.season, ep.episode) %}
+    <table class="recent_episode_table" width="324px">
+        <tr>
+            <td class="ep_table_image">
+                <a style="text-decoration:none" href="/tv/info?id={{ ep.idShow }}&s={{ ep.season }}">
+                    <img style="background-color: black; display: block;" src="/img/xbmcShowPoster?id={{ ep.idShow }}&h=160" height="130" />
+                </a>
+            </td>
+            <td class="ep_table_image">
+                <a href="/watch/episode?id={{ ep.id }}{{ "&resume=True" if resume else "" }}">
+                    <img style="background-color: black; display: block;" src="/img/episodeThumb?season={{ ep.season }}&episode={{ ep.episode }}&watched={{ watched }}&thumbpath64={{ ep.thumbpath64 }}&h=130&w=232" height="130" width="232" />
+                </a>
+            </td>
+        </tr>
+        <tr colspan="2">
+            <td colspan="2" class="recent_ep_title">
+                <a style="text-decoration: none;" href="/watch/episode?id={{ ep.id }}{{ "&resume=True" if resume else "" }}">
+                    <span>{{ ep.showName }} - {{ num }} - {{ epName }}</span>
+                </a>
+            </td>
+        </tr>
+    </table>
+{%- endmacro %}
+
+{% macro episode_table(ep, user) -%}
+    {% set epName = ep.epName|replace('&', '%26') %}
+    {% set watched = ep.watched and user.watched_status %}
+    {% set num = "%dx%02d"|format(ep.season, ep.episode) %}
+    <a style="text-decoration:none" href="/watch/episode?id={{ ep.id }}">
+        <table class="episode_table">
+            <tr>
+                <th rowspan="3" class="ep_table_image">
+                    <img style="background-color: black; display: block;" src="/img/episodeThumb?season={{ ep.season }}&episode={{ ep.episode }}&watched={{ watched }}&thumbpath64={{ ep.thumbpath64 }}" width="200" height="112" />
+                </th>
+                <td class="epTitle">
+                    <span>{{ num }} - {{ epName }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top;">
+                    <span>Aired: {{ ep.firstaired }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top;">
+                    <div class="episode_summary"> </div>
+                    <span class="{{ ep.quality|sb_quality_css }}" style="float: left;">{{ ep.quality }}</span>
+                </td>
+            </tr>
+        </table>
+    </a>
+{%- endmacro %}
+
+{% macro coming_poster(ep) -%}
+    <div class="{{ ep.type|sb_coming_css }}">
+        <div class="tvshowDiv">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <th colspan="2">
+            <span class="tvshowTitle"><a href="/tv/info?id={{ ep.idShow }}">{{ ep.showName }} [{{ ep.days_away|pretty_days_away }}]
+            </a></span>
+            <span class="tvshowTitleIcons">
+                <a href="http://thetvdb.com/?tab=series&amp;id={{ ep.tvdb_id }}" rel="noreferrer" onclick="window.open('http://derefer.me/?' + this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id={{ ep.tvdb_id }}"><img alt="[tvdb]" height="16" width="16" src="/images/thetvdb16.png" /></a>
+            </span>
+                    </th>
+                </tr>
+                <tr>
+                    <th rowspan="2" style="background-color: #efefef;">
+                        <a href="/tv/info?id={{ ep.idShow }}"><img alt="" class="posterThumb" src="/sickbeard/poster?id={{ ep.tvdb_id }}" /></a>
+                    </th>
+                    <td class="nextEp">
+                        <span class="title">Next Episode:</span> <span>{{ "%dx%02d"|format(ep.season, ep.episode) }} - {{ ep.epName }} ({{ ep.firstaired }})</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">
+                        <span class="title">Airs:</span> <span>{{ ep.airtime }} on {{ ep.network }}</span>
+                        [<span class="title">{{ ep.quality }}</span>]<br />
+                        <img class="epSummaryTrigger" src="/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div style="visibility: collapse;" class="epSummary">{# {{ ep.summary }} #}</div>
+                        <br/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro xbmc_header(xbmc_servers) -%}
+    <div class="header container">
+        <span>Server:</span>
+        <div class="btn-group">
+            {% for x in xbmc_servers %}
+                <button type="button" class="btn btn-default">{{ x.name }}</button>
+            {% endfor %}
+            <button type="button" class="btn btn-default">Stream</button>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro favorite_table(fave, user) -%}
+    <table class="recent_episode_table" style="display: inline-table;" width="324px">
+        <tr>
+            <td class="ep_table_image">
+                <a style="text-decoration:none" href="/tv/info?id={{ fave.xbmc_id }}">
+                    <img style="background-color: black; display: block;" src="/img/xbmcShowPoster?id={{ fave.xbmc_id }}&h=160" height="130" />
+                </a>
+            </td>
+            <td>
+                <table>
+                    <tr><td style="vertical-align: top;"><input id="cb_fave_notify_{{ fave.id }}" type="checkbox" style="display:inline;float:left;margin-left: 20em" {{ 'checked="checked"' if fave.notify else '' }} /></td></tr>
+                    <tr><td><button id="btn_favorite" onclick="removeFavoriteShow('{{ fave.xbmc_id }}');">Remove from Favorites</button></td></tr>
+                </table>
+            </td>
+        </tr>
+        <tr colspan="2">
+            <td colspan="2" class="recent_ep_title">
+                <a style="text-decoration: none;" href="/tv/info?id={{ fave.xbmc_id }}">
+                    <span>{{ fave.show_name }}</span>
+                </a>
+            </td>
+        </tr>
+    </table>
+{%- endmacro %}
+
+{% macro blank() -%}
+{%- endmacro %}

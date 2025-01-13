@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}{{ show.name }}{% endblock %}
+
+{% block css %}
+    {{ super() }}
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript">
+    $(document).ready(function() {
+        {% if show.tvdb_id and initial_season == -1 %}
+        getNextEpisode('{{ show.tvdb_id }}');
+        {% endif %}
+
+        {% if missing.total > 0 %}
+            var m = '';
+            {% for s in missing.seasons %}
+                m += '<i><strong>Season {{ s.num }}:</strong></i><br/>';
+                {% for e in s.eps %}
+                    m += '{{ s.num }}' + 'x' + '{{ e.episode }} - {{ e.epName }}<br/>';
+                {% endfor %}
+                m += '<br/>';
+            {% endfor %}
+            $.pnotify({
+                title: 'Missing Episodes',
+                text: m,
+                type: 'error',
+                styling: 'jqueryui',
+                opacity: 1.0,
+                history: false,
+                delay: 10000
+            });
+        {% endif %}
+
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+<div class="tv_info">
+<table>
+    <tr>
+        <th rowspan="2">
+            <img class="tv_info_fanart" src="/img/xbmcImage?path64={{ show.fanart64 }}&h=200&type=FANART" />
+        </th>
+        <td class="show_title">
+            <span>{{ show.name }}</span>
+            <span class="{{ show.status|sb_status_css }}" style="float: right; font-size: 12pt; margin: 5pt;">{{ show.status }}</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table>
+                <tr>
+                    <td><p>{{ show.plot }}</p></td>
+                </tr>
+                <tr><td>
+                    Total Episodes: {{ show.totalEps }}
+                </td></tr>
+                <tr><td>
+                    Watched Episodes: {{ show.watchedEps }}
+                </td></tr>
+                <tr><td>
+                    {% if next_ep_date %}
+                    {{ next_ep_date }}  {{ next_ep_away.days }} days away
+                    {% endif %}
+                </td></tr>
+                <tr><td style="float: right;">
+                    {% if not show.is_user_favorite %}
+                    <button id="btn_favorite" onclick="addFavoriteShow('{{ idShow }}');">Add to Favorites</button>
+                    {% else %}
+                    <button id="btn_favorite" onclick="removeFavoriteShow('{{ idShow }}');">Remove from Favorites</button>
+                    {% endif %}
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</div>
+
+<div id="season_tabs" class="tv_seasons">
+<ul>
+{% for season in seasons %}
+    <li style="display: inline; float: left; margin: 3px"><a style="text-decoration: none;" href="/tv/info?id={{ show.id }}&s={{ season.num }}">
+        {% if season.thumbpath64 != "" %}
+            {% set imgUrl = "/img/xbmcImage?path64=%s&w=120&h=180&type=TVSHOW"|format(season.thumbpath64) %}
+        {% else %}
+            {% set imgUrl = "/img/xbmcShowPoster?id=%s&w=120&h=180"|format(idShow) %}
+        {% endif %}
+        {% if user.watched_status %}
+            <img style="background-color: black; display: block; background-image: url('{{ imgUrl }}');" src="/img/tvshowOverlay?watched={{ season.watched }}&newCount={{ season.newEps }}&w=120&h=180" width="120" height="180" />
+        {% else %}
+            <img style="background-color: black; display: block;" src="{{ imgUrl }}" width="120" height="180" />
+        {% endif %}
+        {% set selected = "" if initial_season != season.num else "selectedSeason" %}
+        {% if season.num == 0 %}
+            <div class="tvshowName {{ selected }}">Specials</div>
+        {% else %}
+        <div class="tvshowName {{ selected }}">Season {{ season.num }}</div>
+        {% endif %}
+    </a></li>
+{% endfor %}
+</ul>
+
+<span class="clearfix"></span>
+<div style="margin-top: 10px"></div>
+
+{% set eps_per_row = 2 %}
+
+{% for season in seasons %}
+{% if season.num == initial_season %}
+<div id="season_tab_{{ season.num }}">
+    <div class="season_episodes">
+    <table class="season_table">
+    {% for ep in season.eps %}
+        {% if show_watched or not ep.watched %}
+            {# 0 based loop index #}
+            {% if loop.index0 % eps_per_row == 0 %}
+                <tr>
+            {% endif %}
+            <td>
+
+            {{ macros.episode_table(ep, user) }}
+
+            </td>
+            {# 1 based loop index #}
+            {% if loop.index % eps_per_row == 0 %}
+                </tr>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    </table>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}TV Shows - BRDFlix{% endblock %}
+
+{% block css %}
+    {{ super() }}
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript">
+        var showWatched = true;
+        var genresFilter = null;
+
+        function toggleWatched(){
+            showWatched = !showWatched;
+            var btn = document.getElementById("btnWatched");
+            if (showWatched){
+                btn.innerHTML = "Hide Watched";
+            } else {
+                btn.innerHTML = "Show Watched";
+            }
+            filterShows();
+        }
+
+        function filterShows(){
+            var count = 0;
+            var val = document.getElementById('filter').value;
+            var allShows = document.getElementById('allShows');
+            for (var i = 0; i < allShows.children.length; i++) {
+                var child = allShows.children[i];
+                var name = getData(child, "name");
+                var watched = getBool(child, "watched");
+                var visible = name.toLowerCase().indexOf(val.toLowerCase()) != -1;
+                visible = visible && (showWatched || !watched);
+                if (visible && genresFilter != null){
+                    visible = false;
+                    var genres = getData(child, "genres").split(',');
+                    for (var j = 0; j < genres.length; j++){
+                        if (genres[j] == genresFilter){
+                            visible = true;
+                            break;
+                        }
+                    }
+                }
+                if (visible){
+                    child.style.visibility = "visible";
+                    child.style.display = "inline";
+                    count++;
+                } else {
+                    child.style.visibility = "collapse";
+                    child.style.display = "none";
+                }
+            }
+            document.getElementById('filterCount').innerHTML = count == 1 ? count + " TV Show" : count + " TV Shows";
+        }
+
+        function filterGenres(v){
+            genresFilter = v;
+            filterShows();
+        }
+
+        function clearFilter(){
+            document.getElementById('filter').value = "";
+            genresFilter = null;
+            filterShows();
+            document.getElementById('filter').focus();
+        }
+
+        $(document).ready(function() {
+            document.getElementById('filter').focus();
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <nav role="navigation" class="clearfix">
+        <ul class="main-nav">
+            <li>
+                <a href="#">Genres</a>
+                <div class="dropdown">
+                    <ul class="meta-links-top">
+                        <li><a href="#" onclick="filterGenres(null);">ALL</a></li>
+                    </ul>
+                    <ul>
+                        {% for genre in all_genres %}
+                        <li><a href="#" onclick="filterGenres('{{ genre }}');">{{ genre }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </li>
+
+            <li><a href="#">Title</a>
+                <div class="dropdown">
+                    <ul>
+                        <li><a href="/tv/?sort_method=title&ascending=True">Ascending (A-Z)</a></li>
+                        <li><a href="/tv/?sort_method=title&ascending=False">Descending (Z-A)</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li><a href="#">Year</a>
+                <div class="dropdown">
+                    <ul>
+                        <li><a href="/tv/?sort_method=year&ascending=False">Newest First</a></li>
+                        <li><a href="/tv/?sort_method=year&ascending=True">Oldest First</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li><a href="#">Episodes</a>
+                <div class="dropdown">
+                    <ul>
+                        <li><a href="/tv/?sort_method=episode&ascending=True">Least</a></li>
+                        <li><a href="/tv/?sort_method=episode&ascending=False">Most</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li><a href="#">Date Added</a>
+                <div class="dropdown">
+                    <ul>
+                        <li><a href="/tv/?sort_method=dateadded&ascending=False">Newest First</a></li>
+                        <li><a href="/tv/?sort_method=dateadded&ascending=True">Oldest First</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            <li><a href="#">Misc</a>
+                <div class="dropdown">
+                    <ul>
+                        <li><a href="/tv/?sort_method=lastplayed&ascending=False">Recently Played</a></li>
+                        <li><a href="/tv/?sort_method=random">Random</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="search-container">
+                <div>
+                    <input id="filter" style="width:200px; display: inline;" type="text" name="filter" value="" placeholder="Filter..." onkeyup="filterShows();" />
+                    <button style="display: inline; min-width: 10px;" onclick="clearFilter();">Clear</button>
+                    {% if watched_status %}
+                    <button id="btnWatched" style="min-width: 10px;" onclick="toggleWatched();">Hide Watched</button>
+                    {% endif %}
+                    <span class="labelCount" id="filterCount">{{ shows|length }} TV Shows</span>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <br />
+
+    <div id="allShows">
+    {% for show in shows %}
+        {% if show_watched or not show.watched %}
+            {{ macros.tv_poster(show, user) }}
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endblock %}

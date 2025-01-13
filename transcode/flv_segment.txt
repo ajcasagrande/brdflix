@@ -1,0 +1,1 @@
+"[ffmpeg]" -ss [offset] -i "[fname]" -t [duration] [mappings] [srt] -vol [volume] -b:v [bitrate]k -vf scale='[width]:trunc(ow/a/2)*2' -ar 44100 -ac 2 -v 0 -f flv -vcodec libx264 -preset superfast -threads 2 -

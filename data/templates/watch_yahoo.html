@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript" src="/jwplayer/jwplayer.js"></script>
+
+<script type="text/javascript">
+var ua = navigator.userAgent.toLowerCase();
+var isMobile = ua.indexOf("mobile") > -1;
+
+var skin = "/jwplayer/skins/newtubedark/newtubedark.zip";
+if (isMobile){
+    skin = "/jwplayer/newtubedark_mobile.zip";
+}
+
+jQuery(document).ready(function() {
+    jwplayer("container").setup({
+        file: "{{ movie.trailer_file }}",
+        width: 854,
+        height: 480,
+        skin: skin,
+        provider: "video",
+        autostart: "true",
+        modes: [ { type: 'flash', src: "/jwplayer/player.swf" } ],
+        controlbar: "over"
+    });
+});
+</script>
+{% endblock %}
+
+{% block header %}
+    {% if embed %}
+        {# DO NOTHING -- WE DO NOT WANT A HEADER FOR EMBED MODE! #}
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="wrapper">
+    <div id="container" style="color:#fff"><a href="http://www.adobe.com/go/getflashplayer" target="_blank">Get Flash player</a></div>
+</div>
+{% endblock %}
+
+{% block footer %}
+    {% if embed %}
+        {# DO NOTHING -- WE DO NOT WANT A FOOTER FOR EMBED MODE! #}
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
