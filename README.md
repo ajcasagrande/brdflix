@@ -6,7 +6,7 @@ This was created in 2013 around the timeframe when Netflix streaming was first s
 This is essentially what Plex.tv eventually became, but at the time, Plex hadn't even released a 1.0 yet, and this was quite fully featured comparatively.
 I no longer recommend the use of this software, as apps such as Plex are much more suited today, however I have provided it to share the ideas, concepts, and code within.
 
-Originally based on the XBMCSonic project, however through countless additions and modifications, it no longer resembles much of the original codebase.
+Originally based on the Subsonic project, however through countless additions and modifications, it no longer resembles much of the original codebase.
 
 > **Note:** This project originally contained hard-coded values, and those values have been replaced with `<TODO>` inside the codebase.
 > I don't really recommend anyone trying to use this. I have mostly provided it to share the ideas, concepts, and code within.
